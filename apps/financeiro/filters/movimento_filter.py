@@ -18,7 +18,6 @@ class MovimentoFilter(filters.FilterSet):
     class Meta:
 
         model = Movimento
-
         fields = [
             "tipo",
             "conta",

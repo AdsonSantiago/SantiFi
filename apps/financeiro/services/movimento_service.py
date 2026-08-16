@@ -77,12 +77,12 @@ class MovimentoService:
                 raise MovimentoException(
                     "O tipo da categoria é incompatível."
                 )
-            
-            if valor <= Decimal("0"):
-                raise MovimentoException(
+
+        if valor <= Decimal("0"):
+            raise MovimentoException(
                 "O valor deve ser maior que zero."
             )
-
+        
     @staticmethod
     def buscar_conta(usuario, conta):
 
