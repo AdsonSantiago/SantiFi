@@ -1,0 +1,38 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f5f7fa;
+    color: #1f2937;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+
+
+
+
+
+
+@media (max-width: 1000px) {
+
+    .kpi-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .dashboard-main {
+        grid-template-columns: 1fr;
+    }
+
+}

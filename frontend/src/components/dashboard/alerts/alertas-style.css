@@ -1,0 +1,27 @@
+.alerts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.alert-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.alert-item span {
+    font-weight: 600;
+}
+
+.alert-empty {
+    padding: 20px 12px;
+    text-align: center;
+}
+
+.alert-empty p {
+    margin: 0;
+}

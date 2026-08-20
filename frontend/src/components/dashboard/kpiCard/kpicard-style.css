@@ -1,0 +1,28 @@
+.kpi-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.kpi-card {
+    padding: 22px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+}
+
+.kpi-main {
+    padding: 26px;
+}
+
+.kpi-title {
+    display: block;
+    margin-bottom: 12px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.kpi-value {
+    font-size: 24px;
+}

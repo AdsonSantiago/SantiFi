@@ -1,0 +1,22 @@
+.header {
+    height: 72px;
+    padding: 0 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.header-title {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}

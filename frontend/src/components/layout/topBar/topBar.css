@@ -1,0 +1,44 @@
+.top-bar {
+    height: 64px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 16px;
+
+    padding: 0 24px;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    background: #ffffff;
+}
+
+.top-bar-search {
+    flex: 1;
+}
+
+.top-bar-search input {
+    width: 100%;
+
+    max-width: 400px;
+
+    padding: 9px 12px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 8px;
+}
+
+.top-bar-period select {
+    padding: 9px 12px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+}
+
+.top-bar-user {
+    padding-left: 16px;
+}
