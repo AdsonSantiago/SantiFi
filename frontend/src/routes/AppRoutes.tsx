@@ -8,6 +8,7 @@ import Login from "../pages/login/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../components/layout/MainLayout";
+import Movimentos from "../pages/movimentos/Movimentos";
 
 function AppRoutes() {
     return (
@@ -24,6 +25,10 @@ function AppRoutes() {
                         <Route
                             path="/dashboard"
                             element={<Dashboard />}
+                        />
+                        <Route
+                            path="/movimentos"
+                            element={<Movimentos />}
                         />
                     </Route>                    
                 </Route>

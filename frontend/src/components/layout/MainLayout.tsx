@@ -1,30 +1,49 @@
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
 
 import Sidebar from "./sidebar/Sidebar";
-import TopBar from "./topBar/topBar";
+import TopBar from "./topBar/TopBar";
 
 import "./mainLayout.css";
 
 function MainLayout() {
-    return (
-        <div className="main-layout">
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-            <Sidebar />
+  function handleOpenSidebar() {
+    setSidebarOpen(true);
+  }
 
-            <div className="main-content">
+  function handleCloseSidebar() {
+    setSidebarOpen(false);
+  }
 
-                <TopBar />
+  function handleToggleSidebar() {
+    setSidebarCollapsed((current) => !current);
+  }
 
-                <main className="page-content">
+  return (
+    <div
+      className={`main-layout ${
+        sidebarCollapsed ? "sidebar-is-collapsed" : ""
+      }`}
+    >
+      <Sidebar
+        isOpen={sidebarOpen}
+        collapsed={sidebarCollapsed}
+        onClose={handleCloseSidebar}
+        onToggleCollapse={handleToggleSidebar}
+      />
 
-                    <Outlet />
+      <div className="main-content">
+        <TopBar onMenuClick={handleOpenSidebar} />
 
-                </main>
-
-            </div>
-
-        </div>
-    );
+        <main className="page-content">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  );
 }
 
 export default MainLayout;

@@ -1,6 +1,6 @@
 import api from "./api";
 
-export interface Movement {
+export interface Movimento {
     id: number;
     conta: number;
     categoria: number | null;
@@ -11,15 +11,16 @@ export interface Movement {
     observacao: string | null;
 }
 
-interface MovementResponse {
+interface MovimentoResponse {
     count: number;
     next: string | null;
     previous: string | null;
-    results: Movement[];
+    results: Movimento[];
 }
 
-export async function getMovements(): Promise<MovementResponse> {
-    const response = await api.get<MovementResponse>(
+export async function getMovements(): Promise<MovimentoResponse> {
+
+    const response = await api.get<MovimentoResponse>(
         "/financeiro/movimentos/"
     );
 
