@@ -9,6 +9,7 @@ import Dashboard from "../pages/dashboard/Dashboard";
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../components/layout/MainLayout";
 import Movimentos from "../pages/movimentos/Movimentos";
+import Contas from "../pages/contas/Contas";
 
 function AppRoutes() {
     return (
@@ -29,6 +30,10 @@ function AppRoutes() {
                         <Route
                             path="/movimentos"
                             element={<Movimentos />}
+                        />
+                        <Route
+                            path="/contas"
+                            element={<Contas />}
                         />
                     </Route>                    
                 </Route>

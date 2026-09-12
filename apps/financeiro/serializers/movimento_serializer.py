@@ -1,9 +1,12 @@
 from rest_framework import serializers
-from drf_spectacular.utils import (extend_schema_serializer, OpenApiExample)
+from drf_spectacular.utils import (
+    extend_schema_serializer,
+    OpenApiExample,
+)
 
-from apps.core.exceptions import MovimentoException
 from apps.financeiro.models import Movimento
 from apps.financeiro.services.movimento_service import MovimentoService
+
 
 @extend_schema_serializer(
     examples=[
@@ -24,7 +27,7 @@ from apps.financeiro.services.movimento_service import MovimentoService
         ),
         OpenApiExample(
             "Criar receita",
-            summary="Cadastro de uma receita",
+            summary="Cadastro de uma receita financeira",
             description="Exemplo de criação de uma receita financeira.",
             value={
                 "conta": 1,
@@ -39,7 +42,6 @@ from apps.financeiro.services.movimento_service import MovimentoService
         ),
     ]
 )
-
 class MovimentoSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -60,25 +62,7 @@ class MovimentoSerializer(serializers.ModelSerializer):
             "id",
         )
 
-    def validate(self, attrs):
-
-        try:
-
-            MovimentoService.validar(
-                usuario=self.context["request"].user,
-                conta=attrs["conta"],
-                categoria=attrs.get("categoria"),
-                tipo=attrs["tipo"],
-                valor=attrs["valor"],
-            )
-
-        except MovimentoException as e:
-            raise serializers.ValidationError(str(e))
-
-        return attrs
-
     def create(self, validated_data):
-
         return MovimentoService.criar_movimento(
             usuario=self.context["request"].user,
             **validated_data,

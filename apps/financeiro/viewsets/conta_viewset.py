@@ -36,3 +36,8 @@ class ContaViewSet(BaseViewSet):
         "ordem",
         "nome",
     ]
+
+    def perform_create(self, serializer):
+        serializer.save(
+            usuario=self.request.user
+        )

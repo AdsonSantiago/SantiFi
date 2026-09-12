@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./recentMovements-style.css";
 
-import type { Movement } from "../../../services/movementService";
+import type { Movimento } from "../../../services/movementService";
 import { getMovements } from "../../../services/movementService";
 import { formatCurrency } from "../../../utils/formatCurrency";
 
@@ -11,7 +11,7 @@ function formatDate(date: string): string {
     );
 }
 
-function getMovementType(tipo: Movement["tipo"]): string {
+function getMovementType(tipo: Movimento["tipo"]): string {
 
     switch (tipo) {
 
@@ -31,7 +31,7 @@ function getMovementType(tipo: Movement["tipo"]): string {
 
 function RecentMovements() {
 
-    const [movements, setMovements] = useState<Movement[]>([]);
+    const [movements, setMovements] = useState<Movimento[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 

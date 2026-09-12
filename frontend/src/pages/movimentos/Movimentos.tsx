@@ -4,6 +4,7 @@ import type { Movimento } from "../../services/movementService";
 import { getMovements } from "../../services/movementService";
 
 import MovimentosTable from "../../components/movimentos/movimentosTable";
+import MovimentoForm from "../../components/movimentos/movimentoForm/MovimentoForm";
 
 import "./movimentos.css";
 
@@ -13,6 +14,7 @@ function Movimentos() {
   const [error, setError] = useState("");
   const [busca, setBusca] = useState("");
   const [tipoFiltro, setTipoFiltro] = useState("");
+  const [formAberto, setFormAberto] = useState(false);
 
   useEffect(() => {
     let ignore = false;
@@ -47,6 +49,15 @@ function Movimentos() {
     };
   }, []);
 
+  async function atualizarMovimentos() {
+    try {
+      const data = await getMovements();
+      setMovimentos(data.results);
+    } catch (error) {
+      console.error("Erro ao atualizar movimentos:", error);
+    }
+  }
+
   const movimentosFiltrados = useMemo(() => {
     const texto = busca.trim().toLowerCase();
 
@@ -79,10 +90,11 @@ function Movimentos() {
         </div>
 
         <button
-          type="button"
-          className="movimentos-button"
+            type="button"
+            className="movimentos-button"
+            onClick={() => setFormAberto(true)}
         >
-          + Novo movimento
+            + Novo movimento
         </button>
       </section>
 
@@ -143,6 +155,40 @@ function Movimentos() {
           <MovimentosTable movimentos={movimentosFiltrados} />
         )}
       </section>
+      
+      {formAberto && (
+        <div className="movimento-modal">
+
+            <div className="movimento-modal-content">
+
+                <div className="movimento-modal-header">
+
+                    <div>
+                        <span>LANÇAMENTO</span>
+
+                        <h2>Novo movimento</h2>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={() => setFormAberto(false)}
+                        aria-label="Fechar formulário"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+                <MovimentoForm
+                  onSuccess={async () => {
+                    await atualizarMovimentos();
+                    setFormAberto(false);
+                  }}
+                />
+            </div>
+
+        </div>
+    )}
     </div>
   );
 }
