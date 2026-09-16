@@ -184,6 +184,7 @@ function Movimentos() {
                     await atualizarMovimentos();
                     setFormAberto(false);
                   }}
+                  onCancel={() => setFormAberto(false)}
                 />
             </div>
 
