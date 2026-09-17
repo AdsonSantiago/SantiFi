@@ -1,5 +1,6 @@
 # SantiFi
 
+
 > De forms para prompts. Seu controle financeiro com inteligência artificial.
 
 ![SantiFi Banner](./docs/santifi-banner.png)
@@ -54,13 +55,24 @@ Usuário marca como Pago
         ├─► Se recorrente → cria próximo planejamento
         └─► Se parcelado → cria próxima parcela
 
-### Próxima Evolução: AI Agent
+### 🤖 Próxima Evolução: AI Agent
 
-### Stack
+A ideia é que o usuário não precise mais preencher forms:
+"lança 45 reais de Uber ontem na Nubank"
+"cria conta Caixa com 500 reais"
+"quanto gastei de mercado esse mês?"
 
-###Autor
+### 🛠️ Stack
 
-### MIT
+Backend: Python, Django, DRF, python-dateutilFrontend: React, ViteAI (em implementação): Pydantic AI, OpenAI
+
+### 📬 Autor
+
+Adson Santiago - Python Dev focado em Django + AI AgentsGitHub: @AdsonSantiagoEmail: adsonsantiago@hotmail.com
+
+### 📜 Licença
+
+Este projeto está licenciado sob a licença MIT.
 
 ![image](container:///mnt/data/django_react_ai_agent_santifi_cover.webp)
 
