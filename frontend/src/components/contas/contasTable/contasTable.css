@@ -154,6 +154,138 @@
   background: #64748b;
 }
 
+.contas-table-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+
+  min-width: 190px;
+}
+
+.contas-table-actions button {
+  min-height: 32px;
+  padding: 0 10px;
+
+  border-radius: 9px;
+
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+
+.contas-table th.contas-actions-heading,
+.contas-table td.contas-actions-cell {
+  width: 230px;
+  min-width: 230px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.contas-actions-heading {
+  white-space: nowrap;
+}
+
+.contas-actions-cell {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.contas-table-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(82px, 1fr));
+  align-items: center;
+  gap: 8px;
+
+  width: 100%;
+  max-width: 205px;
+  margin: 0 auto;
+}
+
+.contas-table-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  min-height: 36px;
+  padding: 0 10px;
+
+  border-radius: 10px;
+
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.contas-table-actions button:hover {
+  transform: translateY(-1px);
+}
+
+.contas-table-actions button:focus-visible {
+  outline: 2px solid #67e8f9;
+  outline-offset: 3px;
+}
+
+.conta-action-edit {
+  border: 1px solid rgba(103, 232, 249, 0.22);
+
+  color: #67e8f9;
+  background: rgba(103, 232, 249, 0.08);
+}
+
+.conta-action-edit:hover {
+  border-color: rgba(103, 232, 249, 0.46);
+  background: rgba(103, 232, 249, 0.15);
+  box-shadow: 0 0 16px rgba(103, 232, 249, 0.12);
+}
+
+.conta-action-toggle {
+  border: 1px solid rgba(251, 113, 133, 0.22);
+
+  color: #fb7185;
+  background: rgba(251, 113, 133, 0.08);
+}
+
+.conta-action-toggle:hover {
+  border-color: rgba(251, 113, 133, 0.46);
+  background: rgba(251, 113, 133, 0.15);
+  box-shadow: 0 0 16px rgba(251, 113, 133, 0.12);
+}
+
+.conta-action-toggle.ativo {
+  border-color: rgba(74, 222, 128, 0.22);
+
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.08);
+}
+
+.conta-action-toggle.ativo:hover {
+  border-color: rgba(74, 222, 128, 0.46);
+  background: rgba(74, 222, 128, 0.15);
+  box-shadow: 0 0 16px rgba(74, 222, 128, 0.12);
+}
+
 /* Estado vazio */
 
 .contas-table-empty {

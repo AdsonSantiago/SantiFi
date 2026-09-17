@@ -1,103 +1,82 @@
-## Planejamento Financeiro com Django
+# SantiFi
 
-# 📌 Descrição
-Este projeto é uma aplicação desenvolvida em Python utilizando o framework Django e a biblioteca dateutil para manipulação de datas.
-O objetivo é gerenciar planejamentos financeiros, permitindo marcar pagamentos, criar movimentos e lidar com recorrências e parcelamentos.
 
-## ⚙️ Instalação
-# Clonar o repositório
-git clone https://github.com/AdsonSantiago/finance_control_santiago.git
-cd planejamento-financeiro
+> De forms para prompts. Seu controle financeiro com inteligência artificial.
 
-# Criar ambiente virtual
+![SantiFi Banner](./docs/santifi-banner.png)
+
+**SantiFi** é a evolução do meu antigo finance_control_santiago. Um sistema de controle financeiro pessoal que está migrando de CRUD tradicional para arquitetura agêntica.
+
+**Stack:** Django + React + Vite + Pydantic AI
+
+### ✨ Features
+
+- [x] Cadastro de Contas com saldo inicial e ordenação
+- [x] Novo Movimento (Receita/Despesa) com vínculo de Conta e Categoria
+- [x] UI dark moderna em React + Vite
+- [x] API REST em Django
+- [ ] **WIP: AI Agent com Pydantic AI - transformando forms em linguagem natural**
+- [ ] Dashboard analítico
+
+#### Preview
+
+| Novo Movimento | Nova Conta |
+| :---: | :---: |
+| Form com toggle Despesa/Receita e validação completa | Cadastro de contas bancárias |
+
+### ⚙️ Instalação
+
+``bash
+# Clone
+git clone https://github.com/AdsonSantiago/SantiFi.git
+cd SantiFi
+
+# Backend
 python -m venv venv
-source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate     # Windows
-
-# Instalar dependências
+source venv/bin/activate
 pip install -r requirements.txt
-
-# Executar migrações
 python manage.py migrate
-
-# Rodar servidor
 python manage.py runserver
 
-## 🚀 Uso
-Crie um planejamento financeiro.
+# Frontend (em outro terminal)
+cd frontend
+npm install
+npm run dev
 
-Acompanhe o status (Pendente → Pago).
-
-Marque como pago para gerar um movimento.
-
-Se recorrente, o sistema cria automaticamente o próximo planejamento.
-
-Se parcelado, gera a próxima parcela.
-
-## 🔄 Regra de Negócio
-
-# Fluxo principal
+### Fluxo Principal
 
 Planejamento criado
-        │
-        ▼
+        ↓
 Status = Pendente
-        │
-        ▼
-Chegou o vencimento
-        │
-        ▼
+        ↓
 Usuário marca como Pago
-        │
-        ├────────► Cria um Movimento
-        ├────────► Atualiza Status = Pago
-        ├────────► Se recorrente, cria o próximo planejamento
-        └────────► Se parcelado, cria a próxima parcela
+        ├─► Cria um Movimento
+        ├─► Atualiza Status = Pago
+        ├─► Se recorrente → cria próximo planejamento
+        └─► Se parcelado → cria próxima parcela
 
+### 🤖 Próxima Evolução: AI Agent
 
-# Fluxo de Recorrência
+A ideia é que o usuário não precise mais preencher forms:
+"lança 45 reais de Uber ontem na Nubank"
+"cria conta Caixa com 500 reais"
+"quanto gastei de mercado esse mês?"
 
-Usuário marca o planejamento como pago
-            │
-            ▼
-Cria o Movimento
-            │
-            ▼
-Atualiza Status = Pago
-            │
-            ▼
-Possui recorrência?
-      │
-   Não ─────────► Finaliza
-      │
-     Sim
-      │
-      ▼
-Calcula a próxima data
-      │
-      ▼
-Cria um novo Planejamento
-      │
-      ▼
-Status = Pendente
+### 🛠️ Stack
 
-## 🔄 Fluxo de Negócio
+Backend: Python, Django, DRF, python-dateutilFrontend: React, ViteAI (em implementação): Pydantic AI, OpenAI
 
-![Fluxograma Planejamento Financeiro](https://copilot.microsoft.com/th/id/BCO.9aca33db-3e79-4ea6-b71d-19fa563dd4c5.png)
+### 📬 Autor
 
+Adson Santiago - Python Dev focado em Django + AI AgentsGitHub: @AdsonSantiagoEmail: adsonsantiago@hotmail.com
 
-## 🤝 Contribuição
-Abra uma issue para sugerir melhorias ou reportar bugs.
+### 📜 Licença
 
-Faça um fork e envie um pull request com suas alterações.
-
-## 📜 Licença
 Este projeto está licenciado sob a licença MIT.
 
-## 📬 Contato
-Autor: Adson Santiago
+![image](container:///mnt/data/django_react_ai_agent_santifi_cover.webp)
 
-Email: adsonsantiago@hotmail.com
 
-GitHub: github.com/AdsonSantiago
+
+
 

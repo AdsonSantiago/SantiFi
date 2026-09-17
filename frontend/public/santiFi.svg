@@ -1,0 +1,20 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7CFF67"/>
+      <stop offset="100%" stop-color="#3AC1FF"/>
+    </linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="512" height="512" rx="120" fill="#0F172A"/>
+  <!-- S + Chart -->
+  <g stroke="url(#g)" stroke-width="18" stroke-linecap="round" fill="none" filter="url(#glow)">
+    <path d="M 140 130 C 90 160 90 220 180 250 L 180 250 C 270 280 270 350 220 380 C 170 410 100 390 90 350"/>
+    <path d="M 180 180 C 130 200 120 230 165 250" stroke-width="14"/>
+    <path d="M 185 300 C 230 320 260 350 210 380" stroke-width="14"/>
+    <!-- Gráfico -->
+    <path d="M 60 410 L 145 325 L 180 350 L 285 220 L 310 210 L 390 120"/>
+  </g>
+  <!-- AI Dots -->
+  <g fill="url(#g)"><circle cx="380" cy="160" r="4"/><circle cx="400" cy="180" r="4"/><circle cx="360" cy="140" r="3"/></g>
+</svg>

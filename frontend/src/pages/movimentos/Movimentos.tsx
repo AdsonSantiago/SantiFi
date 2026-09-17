@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import type { Movimento } from "../../services/movementService";
-import { getMovements } from "../../services/movementService";
+import { getMovements, deleteMovement } from "../../services/movementService";
 
 import MovimentosTable from "../../components/movimentos/movimentosTable";
 import MovimentoForm from "../../components/movimentos/movimentoForm/MovimentoForm";
@@ -15,6 +15,8 @@ function Movimentos() {
   const [busca, setBusca] = useState("");
   const [tipoFiltro, setTipoFiltro] = useState("");
   const [formAberto, setFormAberto] = useState(false);
+  const [movimentoEditando, setMovimentoEditando] =
+  useState<Movimento | null>(null);
 
   useEffect(() => {
     let ignore = false;
@@ -43,6 +45,7 @@ function Movimentos() {
     }
 
     carregarMovimentos();
+
 
     return () => {
       ignore = true;
@@ -78,6 +81,54 @@ function Movimentos() {
 
   const temMovimentos = movimentosFiltrados.length > 0;
 
+  function handleNovoMovimento() {
+    setMovimentoEditando(null);
+    setFormAberto(true);
+  }
+
+  function handleEditarMovimento(movimento: Movimento) {
+    if (movimento.tipo === "TRA") {
+      setError(
+        "Transferências possuem um fluxo próprio e não podem ser editadas aqui."
+      );
+      return;
+    }
+
+    setMovimentoEditando(movimento);
+    setFormAberto(true);
+  }
+
+  async function handleExcluirMovimento(
+    movimento: Movimento
+  ) {
+    const confirmar = window.confirm(
+      `Deseja realmente excluir o movimento "${movimento.descricao}"?`
+    );
+
+    if (!confirmar) {
+      return;
+    }
+
+    try {
+      setError("");
+
+      await deleteMovement(movimento.id);
+
+      setMovimentos((anteriores) =>
+        anteriores.filter(
+          (item) => item.id !== movimento.id
+        )
+      );
+    } catch (error) {
+      console.error("Erro ao excluir movimento:", error);
+
+      setError(
+        "Não foi possível excluir o movimento."
+      );
+    }
+  }
+
+
   return (
     <div className="movimentos">
       <section className="movimentos-header">
@@ -92,7 +143,7 @@ function Movimentos() {
         <button
             type="button"
             className="movimentos-button"
-            onClick={() => setFormAberto(true)}
+            onClick={handleNovoMovimento}
         >
             + Novo movimento
         </button>
@@ -152,7 +203,11 @@ function Movimentos() {
         )}
 
         {!loading && !error && temMovimentos && (
-          <MovimentosTable movimentos={movimentosFiltrados} />
+          <MovimentosTable
+            movimentos={movimentosFiltrados}
+            onEdit={handleEditarMovimento}
+            onDelete={handleExcluirMovimento}
+          />
         )}
       </section>
       
@@ -180,11 +235,16 @@ function Movimentos() {
                 </div>
 
                 <MovimentoForm
+                  movimento={movimentoEditando}
                   onSuccess={async () => {
                     await atualizarMovimentos();
+                    setMovimentoEditando(null);
                     setFormAberto(false);
                   }}
-                  onCancel={() => setFormAberto(false)}
+                  onCancel={() => {
+                    setMovimentoEditando(null);
+                    setFormAberto(false);
+                  }}
                 />
             </div>
 

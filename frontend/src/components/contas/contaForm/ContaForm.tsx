@@ -1,17 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type {
+  Conta,
   CreateAccountData,
 } from "../../../services/accountService";
 
 import "./contaForm.css";
 
 interface ContaFormProps {
+  conta?: Conta | null;
   onSubmit: (data: CreateAccountData) => Promise<void>;
   onCancel: () => void;
 }
 
 function ContaForm({
+  conta,
   onSubmit,
   onCancel,
 }: ContaFormProps) {
@@ -22,6 +25,24 @@ function ContaForm({
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const modoEdicao = Boolean(conta);
+
+  useEffect(() => {
+    if (conta) {
+      setNome(conta.nome);
+      setTipo(conta.tipo);
+      setSaldoInicial(conta.saldo_inicial);
+      setOrdem(conta.ordem);
+    } else {
+      setNome("");
+      setTipo("CC");
+      setSaldoInicial("");
+      setOrdem(1);
+    }
+
+    setError("");
+  }, [conta]);
 
   async function handleSubmit(
     event: React.FormEvent<HTMLFormElement>,
@@ -38,7 +59,9 @@ function ContaForm({
     }
 
     if (nomeNormalizado.length < 2) {
-      setError("O nome da conta deve ter pelo menos 2 caracteres.");
+      setError(
+        "O nome da conta deve ter pelo menos 2 caracteres.",
+      );
       return;
     }
 
@@ -55,7 +78,9 @@ function ContaForm({
       !Number.isInteger(ordemNormalizada) ||
       ordemNormalizada < 1
     ) {
-      setError("A ordem deve ser um número inteiro maior que zero.");
+      setError(
+        "A ordem deve ser um número inteiro maior que zero.",
+      );
       return;
     }
 
@@ -68,11 +93,16 @@ function ContaForm({
         tipo,
         saldo_inicial: saldoInicial,
         ordem: ordemNormalizada,
-        ativo: true,
+        ativo: conta?.ativo ?? true,
       });
     } catch (error) {
       console.error(error);
-      setError("Não foi possível criar a conta.");
+
+      setError(
+        modoEdicao
+          ? "Não foi possível atualizar a conta."
+          : "Não foi possível criar a conta.",
+      );
     } finally {
       setLoading(false);
     }
@@ -101,10 +131,16 @@ function ContaForm({
               ORGANIZAÇÃO FINANCEIRA
             </p>
 
-            <h2 id="conta-form-title">Nova conta</h2>
+            <h2 id="conta-form-title">
+              {modoEdicao
+                ? "Editar conta"
+                : "Nova conta"}
+            </h2>
 
             <p className="conta-form-description">
-              Cadastre uma conta para acompanhar seu saldo.
+              {modoEdicao
+                ? "Atualize os dados da sua conta."
+                : "Cadastre uma conta para acompanhar seu saldo."}
             </p>
           </div>
 
@@ -130,7 +166,10 @@ function ContaForm({
           </div>
         )}
 
-        <fieldset disabled={loading} className="conta-form-fields">
+        <fieldset
+          disabled={loading}
+          className="conta-form-fields"
+        >
           <div className="conta-form-field">
             <label htmlFor="nome">
               Nome da conta
@@ -151,7 +190,9 @@ function ContaForm({
               maxLength={80}
               required
               aria-required="true"
-              aria-invalid={Boolean(error && !nome.trim())}
+              aria-invalid={Boolean(
+                error && !nome.trim(),
+              )}
             />
           </div>
 
@@ -172,10 +213,21 @@ function ContaForm({
               required
               aria-required="true"
             >
-              <option value="CC">Conta corrente</option>
-              <option value="CP">Poupança</option>
-              <option value="CAR">Carteira</option>
-              <option value="CRT">Cartão</option>
+              <option value="CC">
+                Conta corrente
+              </option>
+
+              <option value="CP">
+                Poupança
+              </option>
+
+              <option value="CAR">
+                Carteira
+              </option>
+
+              <option value="CRT">
+                Cartão
+              </option>
             </select>
           </div>
 
@@ -197,7 +249,9 @@ function ContaForm({
                   min="0"
                   value={saldoInicial}
                   onChange={(event) => {
-                    setSaldoInicial(event.target.value);
+                    setSaldoInicial(
+                      event.target.value,
+                    );
                     setError("");
                   }}
                   placeholder="0,00"
@@ -227,7 +281,9 @@ function ContaForm({
                 step="1"
                 value={ordem}
                 onChange={(event) => {
-                  setOrdem(Number(event.target.value));
+                  setOrdem(
+                    Number(event.target.value),
+                  );
                   setError("");
                 }}
                 required
@@ -260,6 +316,8 @@ function ContaForm({
                 />
                 Salvando...
               </>
+            ) : modoEdicao ? (
+              "Salvar alterações"
             ) : (
               "Criar conta"
             )}

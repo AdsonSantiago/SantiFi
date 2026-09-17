@@ -7,9 +7,14 @@ import {
 import type { FormEvent } from "react";
 import axios from "axios";
 
+import type {
+    Movimento,
+    CreateMovementData,
+} from "../../../services/movementService";
+
 import {
-  createMovement,
-  type CreateMovementData,
+    createMovement,
+    updateMovement,
 } from "../../../services/movementService";
 
 import { getAccounts } from "../../../services/accountService";
@@ -18,8 +23,9 @@ import { getCategories } from "../../../services/categoryService";
 import "./movimentoForm.css";
 
 interface MovimentoFormProps {
-  onSuccess: () => void;
-  onCancel: () => void;
+    movimento?: Movimento | null;
+    onSuccess: () => void;
+    onCancel: () => void;
 }
 
 function getTodayDate(): string {
@@ -33,6 +39,7 @@ function getTodayDate(): string {
 }
 
 function MovimentoForm({
+  movimento,
   onSuccess,
   onCancel,
 }: MovimentoFormProps) {
@@ -58,63 +65,77 @@ function MovimentoForm({
   const [mostrarObservacao, setMostrarObservacao] =
     useState(false);
 
+  const modoEdicao = Boolean(movimento);
+
   useEffect(() => {
-    let ignore = false;
+      async function carregarDados() {
+          try {
+              setLoading(true);
+              setError("");
 
-    async function carregarDados() {
-      try {
-        setLoading(true);
-        setError("");
+              const [contasResponse, categoriasResponse] =
+                  await Promise.all([
+                      getAccounts(),
+                      getCategories(),
+                  ]);
 
-        const [
-          contasResponse,
-          categoriasResponse,
-        ] = await Promise.all([
-          getAccounts(),
-          getCategories(),
-        ]);
+              const contasAtivas = contasResponse.results.filter(
+                  (item) => item.ativo
+              );
 
-        if (ignore) {
-          return;
-        }
+              const categoriasAtivas =
+                  categoriasResponse.results.filter(
+                      (item) => item.ativo
+                  );
 
-        const contasAtivas = contasResponse.results.filter(
-          (item) => item.ativo,
-        );
+              setContas(contasAtivas);
+              setCategorias(categoriasAtivas);
 
-        const categoriasAtivas =
-          categoriasResponse.results.filter(
-            (item) => item.ativo,
-          );
+              if (movimento) {
+                  setConta(String(movimento.conta));
+                  setTipo(
+                      movimento.tipo === "REC"
+                          ? "REC"
+                          : "DES"
+                  );
+                  setCategoria(
+                      movimento.categoria
+                          ? String(movimento.categoria)
+                          : ""
+                  );
+                  setDescricao(movimento.descricao);
+                  setValor(movimento.valor);
+                  setDataMovimento(movimento.data_movimento);
+                  setObservacao(
+                      movimento.observacao ?? ""
+                  );
+                  setMostrarObservacao(
+                      Boolean(movimento.observacao)
+                  );
+              } else {
+                  setConta("");
+                  setTipo("DES");
+                  setCategoria("");
+                  setDescricao("");
+                  setValor("");
+                  setObservacao("");
+                  setMostrarObservacao(false);
 
-        setContas(contasAtivas);
-        setCategorias(categoriasAtivas);
-        setDataMovimento(getTodayDate());
-
-        if (contasAtivas.length > 0) {
-          setConta(String(contasAtivas[0].id));
-        }
-      } catch (error) {
-        console.error(error);
-
-        if (!ignore) {
-          setError(
-            "Não foi possível carregar os dados do formulário.",
-          );
-        }
-      } finally {
-        if (!ignore) {
-          setLoading(false);
-        }
+                  setDataMovimento(getTodayDate());
+              }
+          } catch (error) {
+              console.error(error);
+              setError(
+                  "Não foi possível carregar os dados do formulário."
+              );
+          } finally {
+              setLoading(false);
+          }
       }
-    }
 
-    carregarDados();
+      carregarDados();
+  }, [movimento]);
 
-    return () => {
-      ignore = true;
-    };
-  }, []);
 
   const categoriasFiltradas = useMemo(() => {
     return categorias.filter(
@@ -189,28 +210,37 @@ function MovimentoForm({
       return;
     }
 
-    const movimento: CreateMovementData = {
-      conta: numericAccount,
-      categoria: numericCategory,
-      tipo,
-      descricao: descricao.trim(),
-      valor,
-      data_movimento: dataMovimento,
-      observacao: observacao.trim() || null,
+    const movimentoData: CreateMovementData = {
+        conta: numericAccount,
+        categoria: numericCategory,
+        tipo,
+        descricao: descricao.trim(),
+        valor,
+        data_movimento: dataMovimento,
+        observacao: observacao.trim() || null,
     };
 
     try {
-      setSaving(true);
-      setError("");
+        console.log("Payload enviado:", movimento);
 
-      await createMovement(movimento);
+        setSaving(true);
+        setError("");
 
-      onSuccess();
+        if (modoEdicao && movimento) {
+            await updateMovement(
+                movimento.id,
+                movimentoData
+            );
+        } else {
+          await createMovement(movimentoData);
+        }
+
+        onSuccess();
     } catch (error) {
-      console.error("Erro ao criar movimento:", error);
-      setError(getApiErrorMessage(error));
+        console.error("Erro ao salvar movimento:", error);
+        setError(getApiErrorMessage(error));
     } finally {
-      setSaving(false);
+        setSaving(false);
     }
   }
 
@@ -243,16 +273,19 @@ function MovimentoForm({
         >
         <header className="movimento-form-header">
           <div>
+
             <p className="movimento-form-eyebrow">
-              NOVO LANÇAMENTO
+                {modoEdicao ? "EDIÇÃO DE LANÇAMENTO" : "NOVO LANÇAMENTO"}
             </p>
 
             <h2 id="movimento-form-title">
-              Novo movimento
+                {modoEdicao ? "Editar movimento" : "Novo movimento"}
             </h2>
 
             <p>
-              Registre uma receita ou uma despesa.
+                {modoEdicao
+                    ? "Atualize os dados do movimento."
+                    : "Registre uma receita ou uma despesa."}
             </p>
           </div>
 
@@ -368,18 +401,26 @@ function MovimentoForm({
                 required
                 aria-required="true"
               >
-                <option value="">
-                  Selecione uma conta
-                </option>
-
-                {contas.map((item) => (
-                  <option
-                    key={item.id}
-                    value={item.id}
-                  >
-                    {item.nome}
+                {contas.length === 0 ? (
+                  <option value="">
+                    Nenhuma conta ativa disponível
                   </option>
-                ))}
+                ) : (
+                  <>
+                    <option value="">
+                      Selecione uma conta
+                    </option>
+
+                    {contas.map((item) => (
+                      <option
+                        key={item.id}
+                        value={item.id}
+                      >
+                        {item.nome}
+                      </option>
+                    ))}
+                  </>
+                )}
               </select>
             </div>
 
@@ -524,15 +565,17 @@ function MovimentoForm({
             disabled={saving}
           >
             {saving ? (
-              <>
-                <span
-                  className="movimento-submit-spinner"
-                  aria-hidden="true"
-                />
-                Salvando...
-              </>
+                <>
+                    <span
+                        className="movimento-submit-spinner"
+                        aria-hidden="true"
+                    />
+                    Salvando...
+                </>
             ) : (
-              "Salvar movimento"
+                modoEdicao
+                    ? "Salvar alterações"
+                    : "Salvar movimento"
             )}
           </button>
         </div>

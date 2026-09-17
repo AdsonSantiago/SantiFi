@@ -1,19 +1,21 @@
-import type { Conta } from "../../services/accountService";
+import type { Conta } from "../../../services/accountService";
 
-import { formatCurrency } from "../../utils/formatCurrency";
+import { formatCurrency } from "../../../utils/formatCurrency";
 
 import "./contasTable.css";
 
 interface ContasTableProps {
   contas: Conta[];
+  onEdit: (conta: Conta) => void;
+  onToggleStatus: (conta: Conta) => void;
 }
 
 function getTipoLabel(tipo: string): string {
   const tipos: Record<string, string> = {
-    BANCO: "Banco",
-    CARTAO: "Cartão",
-    DINHEIRO: "Dinheiro",
-    INVESTIMENTO: "Investimento",
+    CC: "Conta Corrente",
+    CP: "Poupança",
+    CAR: "Carteira",
+    CRT: "Cartão",
   };
 
   return tipos[tipo] ?? tipo;
@@ -21,6 +23,8 @@ function getTipoLabel(tipo: string): string {
 
 function ContasTable({
   contas,
+  onEdit,
+  onToggleStatus,
 }: ContasTableProps) {
   if (contas.length === 0) {
     return (
@@ -53,18 +57,17 @@ function ContasTable({
             <th scope="col">Saldo inicial</th>
             <th scope="col">Saldo atual</th>
             <th scope="col">Status</th>
+            <th scope="col" className="contas-actions-heading">Ações</th>
           </tr>
         </thead>
 
         <tbody>
           {contas.map((conta) => {
-            const saldoInicial = Number(
-              conta.saldo_inicial,
-            ) || 0;
+            const saldoInicial =
+              Number(conta.saldo_inicial) || 0;
 
-            const saldoAtual = Number(
-              conta.saldo_atual,
-            ) || 0;
+            const saldoAtual =
+              Number(conta.saldo_atual) || 0;
 
             const tipoClasse = conta.tipo
               .toLowerCase()
@@ -112,8 +115,41 @@ function ContasTable({
                     }`}
                   >
                     <i aria-hidden="true" />
-                    {conta.ativo ? "Ativa" : "Inativa"}
+
+                    {conta.ativo
+                      ? "Ativa"
+                      : "Inativa"}
                   </span>
+                </td>
+
+                <td data-label="Ações">
+                  <div className="contas-table-actions">
+                    <button
+                      type="button"
+                      className="conta-action-edit"
+                      onClick={() => onEdit(conta)}
+                      aria-label={`Editar a conta ${conta.nome}`}
+                    >
+                      Editar
+                    </button>
+
+                    <button
+                      type="button"
+                      className={
+                        conta.ativo
+                          ? "conta-action-toggle"
+                          : "conta-action-toggle ativo"
+                      }
+                      onClick={() => onToggleStatus(conta)}
+                      aria-label={
+                        conta.ativo
+                          ? `Desativar a conta ${conta.nome}`
+                          : `Ativar a conta ${conta.nome}`
+                      }
+                    >
+                      {conta.ativo ? "Desativar" : "Ativar"}
+                    </button>
+                  </div>
                 </td>
               </tr>
             );

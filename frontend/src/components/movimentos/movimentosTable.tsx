@@ -7,6 +7,8 @@ import "./movimentosTable.css";
 
 interface MovimentosTableProps {
   movimentos: Movimento[];
+  onEdit: (movimento: Movimento) => void;
+  onDelete: (movimento: Movimento) => void;
 }
 
 function getTipoLabel(tipo: Movimento["tipo"]) {
@@ -21,6 +23,8 @@ function getTipoLabel(tipo: Movimento["tipo"]) {
 
 function MovimentosTable({
   movimentos,
+  onEdit,
+  onDelete,
 }: MovimentosTableProps) {
   return (
     <div className="movimentos-table-wrap">
@@ -35,6 +39,7 @@ function MovimentosTable({
             <th scope="col">Descrição</th>
             <th scope="col">Tipo</th>
             <th scope="col">Valor</th>
+            <th scope="col">Ações</th>
           </tr>
         </thead>
 
@@ -64,6 +69,31 @@ function MovimentosTable({
                   {movimento.tipo === "DES" && "- "}
                   {formatCurrency(movimento.valor)}
                 </span>
+              </td>
+
+              <td
+                data-label="Ações"
+                className="movimentos-actions-cell"
+              >
+                <div className="movimentos-table-actions">
+                  <button
+                    type="button"
+                    className="movimento-action-edit"
+                    onClick={() => onEdit(movimento)}
+                    aria-label={`Editar o movimento ${movimento.descricao}`}
+                  >
+                    Editar
+                  </button>
+
+                  <button
+                    type="button"
+                    className="movimento-action-delete"
+                    onClick={() => onDelete(movimento)}
+                    aria-label={`Excluir o movimento ${movimento.descricao}`}
+                  >
+                    Excluir
+                  </button>
+                </div>
               </td>
             </tr>
           ))}

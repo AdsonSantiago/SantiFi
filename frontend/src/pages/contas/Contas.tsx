@@ -5,12 +5,12 @@ import type {
 } from "../../services/accountService";
 
 import {
-  getAccounts, createAccount,
+  getAccounts, createAccount, updateAccount, toggleAccount,
 } from "../../services/accountService";
 
 import ContaForm from "../../components/contas/contaForm/ContaForm";
 
-import ContasTable from "../../components/contasTable/ContasTable";
+import ContasTable from "../../components/contas/contasTable/ContasTable";
 
 import "./contas.css";
 
@@ -28,6 +28,7 @@ function Contas() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [contaEditando, setContaEditando] = useState<Conta | null>(null);
 
   useEffect(() => {
     let ignore = false;
@@ -64,19 +65,61 @@ function Contas() {
     };
   }, []);
 
-  async function handleCreateAccount(
-      data: CreateAccountData
-    ) {
+  async function handleSaveAccount(
+    data: CreateAccountData
+  ) {
+    if (contaEditando) {
+      const contaAtualizada = await updateAccount(
+        contaEditando.id,
+        data
+      );
+
+      setContas((contasAtuais) =>
+        contasAtuais.map((contaAtual) =>
+          contaAtual.id === contaAtualizada.id
+            ? contaAtualizada
+            : contaAtual
+        )
+      );
+    } else {
       const novaConta = await createAccount(data);
 
       setContas((contasAtuais) => [
         ...contasAtuais,
         novaConta,
       ]);
+    }
+    setContaEditando(null);
+    setMostrarFormulario(false);
+  }
 
-      setMostrarFormulario(false);
-    }    
+  function handleEditAccount(conta: Conta) {
+    setContaEditando(conta);
+    setMostrarFormulario(true);
+  }
 
+  async function handleToggleStatus(conta: Conta) {
+    try {
+      const contaAtualizada = await toggleAccount(
+        conta.id,
+        !conta.ativo
+      );
+
+      setContas((contasAtuais) =>
+        contasAtuais.map((contaAtual) =>
+          contaAtual.id === contaAtualizada.id
+            ? contaAtualizada
+            : contaAtual
+        )
+      );
+    } catch (error) {
+      console.error(error);
+
+      setError(
+        "Não foi possível alterar o status da conta."
+      );
+    }
+  }  
 
   const saldoTotal = useMemo(() => {
     return contas.reduce((total, conta) => {
@@ -126,7 +169,10 @@ function Contas() {
         <button
           type="button"
           className="contas-add-button"
-          onClick={() => setMostrarFormulario(true)}
+          onClick={() => {
+            setContaEditando(null);
+            setMostrarFormulario(true);
+          }}
         >
           <span aria-hidden="true">+</span>
           Nova conta
@@ -134,8 +180,12 @@ function Contas() {
       </header>
       {mostrarFormulario && (
         <ContaForm
-          onSubmit={handleCreateAccount}
-          onCancel={() => setMostrarFormulario(false)}
+          conta={contaEditando}
+          onSubmit={handleSaveAccount}
+          onCancel={() => {
+            setContaEditando(null);
+            setMostrarFormulario(false);
+          }}
         />
       )}
       
@@ -208,7 +258,11 @@ function Contas() {
             </button>
           </div>
         ) : (
-          <ContasTable contas={contas} />
+          <ContasTable
+            contas={contas}
+            onEdit={handleEditAccount}
+            onToggleStatus={handleToggleStatus}
+          />
         )}
       </section>
     </div>

@@ -43,6 +43,35 @@ export async function createMovement(
         "/financeiro/movimentos/",
         data
     );
+    return response.data;
+}
+
+export async function getMovement(
+    id: number
+): Promise<Movimento> {
+    const response = await api.get<Movimento>(
+        `/financeiro/movimentos/${id}/`
+    );
 
     return response.data;
+}
+
+export async function updateMovement(
+    id: number,
+    data: CreateMovementData
+): Promise<Movimento> {
+    const response = await api.put<Movimento>(
+        `/financeiro/movimentos/${id}/`,
+        data
+    );
+
+    return response.data;
+}
+
+export async function deleteMovement(
+    id: number
+): Promise<void> {
+    await api.delete(
+        `/financeiro/movimentos/${id}/`
+    );
 }

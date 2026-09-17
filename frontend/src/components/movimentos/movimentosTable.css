@@ -100,6 +100,157 @@
   border: 0;
 }
 
+.movimentos-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.movimentos-table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+  color: #e2e8f0;
+}
+
+.movimentos-table thead th {
+  padding: 14px 16px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  color: #94a3b8;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.movimentos-table tbody td {
+  padding: 16px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+  font-size: 0.86rem;
+  vertical-align: middle;
+}
+
+.movimentos-table tbody tr {
+  transition: background 160ms ease;
+}
+
+.movimentos-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.movimentos-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Coluna de ações */
+
+.movimentos-table th.movimentos-actions-heading,
+.movimentos-table td.movimentos-actions-cell {
+  width: 220px;
+  min-width: 220px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.movimentos-actions-heading {
+  white-space: nowrap;
+}
+
+.movimentos-actions-cell {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.movimentos-table-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(82px, 1fr));
+  align-items: center;
+  gap: 8px;
+
+  width: 100%;
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+.movimentos-table-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  min-height: 36px;
+  padding: 0 10px;
+
+  border-radius: 10px;
+
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.movimentos-table-actions button:hover {
+  transform: translateY(-1px);
+}
+
+.movimentos-table-actions button:focus-visible {
+  outline: 2px solid #67e8f9;
+  outline-offset: 3px;
+}
+
+.movimento-action-edit {
+  border: 1px solid rgba(103, 232, 249, 0.22);
+
+  color: #67e8f9;
+  background: rgba(103, 232, 249, 0.08);
+}
+
+.movimento-action-edit:hover {
+  border-color: rgba(103, 232, 249, 0.46);
+  background: rgba(103, 232, 249, 0.15);
+  box-shadow: 0 0 16px rgba(103, 232, 249, 0.12);
+}
+
+.movimento-action-delete {
+  border: 1px solid rgba(251, 113, 133, 0.22);
+
+  color: #fb7185;
+  background: rgba(251, 113, 133, 0.08);
+}
+
+.movimento-action-delete:hover {
+  border-color: rgba(251, 113, 133, 0.46);
+  background: rgba(251, 113, 133, 0.15);
+  box-shadow: 0 0 16px rgba(251, 113, 133, 0.12);
+}
+
+/* Valores */
+
+.movimento-value-income {
+  color: #4ade80;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.movimento-value-expense {
+  color: #fb7185;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 @media (max-width: 768px) {
   .movimentos-table {
     min-width: 100%;
