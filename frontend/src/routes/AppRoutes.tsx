@@ -10,6 +10,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../components/layout/MainLayout";
 import Movimentos from "../pages/movimentos/Movimentos";
 import Contas from "../pages/contas/Contas";
+import Categorias from "../pages/categorias/Categorias";
 
 function AppRoutes() {
     return (
@@ -34,6 +35,10 @@ function AppRoutes() {
                         <Route
                             path="/contas"
                             element={<Contas />}
+                        />
+                        <Route
+                            path="/categorias"
+                            element={<Categorias />}
                         />
                     </Route>                    
                 </Route>

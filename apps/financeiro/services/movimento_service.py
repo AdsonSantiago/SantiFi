@@ -18,6 +18,7 @@ class MovimentoService:
         valor,
         data_movimento,
         observacao=None,
+        transferencia=None,
     ):
         MovimentoService.validar(
             usuario=usuario,
@@ -36,6 +37,7 @@ class MovimentoService:
             valor=valor,
             data_movimento=data_movimento,
             observacao=observacao,
+            transferencia=transferencia,
         )
 
     @staticmethod
@@ -47,19 +49,16 @@ class MovimentoService:
         tipo,
         valor,
     ):
-        # Valida a conta
         MovimentoService.buscar_conta(
             usuario=usuario,
             conta=conta,
         )
 
-        # Valida a categoria
         MovimentoService.buscar_categoria(
             usuario=usuario,
             categoria=categoria,
         )
 
-        # Valida compatibilidade entre categoria e movimento
         if categoria is not None:
             if (
                 categoria.tipo != TipoCategoria.TRANSFERENCIA
@@ -69,7 +68,6 @@ class MovimentoService:
                     "O tipo da categoria é incompatível."
                 )
 
-        # Valida valor
         if valor <= Decimal("0"):
             raise MovimentoException(
                 "O valor deve ser maior que zero."

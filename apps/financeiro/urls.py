@@ -9,6 +9,7 @@ from rest_framework_simplejwt.views import (
 from apps.financeiro.viewsets.conta_viewset import ContaViewSet
 from apps.financeiro.viewsets.categoria_viewset import CategoriaViewSet
 from apps.financeiro.viewsets.movimento_viewset import MovimentoViewSet
+from apps.financeiro.viewsets.transferencia_viewset import TransferenciaViewSet
 from apps.financeiro.viewsets.planejamento_viewset import PlanejamentoViewSet
 from apps.financeiro.viewsets.extrato_viewset import ExtratoViewSet
 from apps.financeiro.viewsets.dashboard_viewset import DashboardViewSet
@@ -47,6 +48,12 @@ router.register(
     "movimentos",
     MovimentoViewSet,
     basename="movimento"
+)
+
+router.register(
+    r"transferencias",
+    TransferenciaViewSet,
+    basename="transferencias",
 )
 
 router.register(
