@@ -1,4 +1,0 @@
-[tool.poetry.dependencies]
-python = "^3.12"
-django = "^5.0"
-gunicorn = "^21.0"
