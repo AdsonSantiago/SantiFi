@@ -1,0 +1,403 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+/* =========================
+   Variáveis do projeto
+========================= */
+
+:root {
+  color-scheme: dark;
+
+  --color-background: #060913;
+  --color-background-soft: #0b1120;
+  --color-surface: rgba(16, 24, 40, 0.72);
+  --color-surface-solid: #101828;
+
+  --color-primary: #67e8f9;
+  --color-primary-dark: #22d3ee;
+  --color-secondary: #a78bfa;
+
+  --color-text: #f8fafc;
+  --color-text-soft: #cbd5e1;
+  --color-text-muted: #94a3b8;
+  --color-text-subtle: #64748b;
+
+  --color-success: #4ade80;
+  --color-warning: #facc15;
+  --color-danger: #fb7185;
+
+  --border-color: rgba(255, 255, 255, 0.12);
+  --border-color-strong: rgba(255, 255, 255, 0.2);
+
+  --shadow-card: 0 24px 100px rgba(0, 0, 0, 0.35);
+  --shadow-primary: 0 0 28px rgba(103, 232, 249, 0.2);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 28px;
+
+  --container-width: 1200px;
+  --transition-fast: 160ms ease;
+  --transition-normal: 240ms ease;
+}
+
+/* =========================
+   Reset básico
+========================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+  background: var(--color-background);
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+
+  color: var(--color-text);
+  background: var(--color-background);
+
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+
+  font-size: 16px;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  border: 0;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:not(:disabled),
+a {
+  cursor: pointer;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin-top: 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--color-text);
+  line-height: 1.1;
+}
+
+a {
+  color: inherit;
+}
+
+ul,
+ol {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+/* =========================
+   Root da aplicação
+========================= */
+
+#root {
+  min-height: 100vh;
+  isolation: isolate;
+}
+
+/* =========================
+   Seleção de texto e foco
+========================= */
+
+::selection {
+  color: #061018;
+  background: var(--color-primary);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+/* =========================
+   Scrollbar futurista
+========================= */
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid var(--color-background);
+  border-radius: 999px;
+  background: #263449;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-dark);
+}
+
+/* =========================
+   Elementos reutilizáveis
+========================= */
+
+.container {
+  width: min(100% - 40px, var(--container-width));
+  margin-inline: auto;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.glass-card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(24px);
+}
+
+/* =========================
+   Inputs padrão
+========================= */
+
+input,
+textarea,
+select {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.05);
+  outline: none;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background var(--transition-fast);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-subtle);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-primary);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 0 3px rgba(103, 232, 249, 0.12);
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled,
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* =========================
+   Botões padrão
+========================= */
+
+.button-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  min-height: 46px;
+  padding: 0 20px;
+
+  border-radius: var(--radius-md);
+
+  color: #061018;
+  font-weight: 800;
+  background: linear-gradient(
+    110deg,
+    var(--color-primary),
+    var(--color-secondary)
+  );
+
+  box-shadow: var(--shadow-primary);
+  transition:
+    transform var(--transition-fast),
+    filter var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.button-primary:hover:not(:disabled) {
+  filter: brightness(1.08);
+  box-shadow: 0 0 38px rgba(103, 232, 249, 0.3);
+  transform: translateY(-2px);
+}
+
+.button-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 46px;
+  padding: 0 20px;
+
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.06);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.button-secondary:hover:not(:disabled) {
+  border-color: var(--border-color-strong);
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+/* =========================
+   Estados
+========================= */
+
+.message-error {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: 0.875rem;
+}
+
+.message-success {
+  margin: 0;
+  color: var(--color-success);
+  font-size: 0.875rem;
+}
+
+/* =========================
+   Animações
+========================= */
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-float {
+  animation: float 8s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+
+/* =========================
+   Responsividade
+========================= */
+
+@media (max-width: 768px) {
+  .container {
+    width: min(100% - 32px, var(--container-width));
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+/* =========================
+   Acessibilidade
+========================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

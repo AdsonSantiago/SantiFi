@@ -27,6 +27,13 @@ class Movimento(models.Model):
         related_name="movimentos"
     )
 
+    transferencia = models.ForeignKey(
+        "Transferencia",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="movimentos",
+    )
 
     tipo = models.CharField(
         max_length=3,

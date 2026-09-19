@@ -80,8 +80,11 @@ Este projeto está licenciado sob a licença MIT.
 
 
 
+<<<<<<< HEAD
 
 
 
 
 
+=======
+>>>>>>> feature/transferencias

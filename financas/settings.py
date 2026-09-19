@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "django_filters",
+    "drf_spectacular",
 
     "apps.authentication",
     'corsheaders',
@@ -59,6 +60,12 @@ REST_FRAMEWORK = {
         "rest_framework.filters.OrderingFilter",
     ],
 
+    "DEFAULT_PAGINATION_CLASS": (
+        "apps.core.pagination.default_pagination.DefaultPagination"
+    ),
+
+    "DEFAULT_SCHEMA_CLASS":
+        "drf_spectacular.openapi.AutoSchema",
 
 }
 
@@ -160,6 +167,59 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
+SPECTACULAR_SETTINGS = {
+    "TITLE": "API Financeiro",
+    "DESCRIPTION": "API para controle financeiro pessoal",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+
+    "SECURITY": [
+        {
+            "BearerAuth": [],
+        }
+    ],
+
+    "COMPONENTS": {
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+            }
+        }
+    },
+
+    "TAGS": [
+        {
+            "name": "Autenticação",
+            "description": "Endpoints de autenticação e gerenciamento de tokens.",
+        },
+        {
+            "name": "Contas",
+            "description": "Gerenciamento das contas financeiras.",
+        },
+        {
+            "name": "Categorias",
+            "description": "Gerenciamento das categorias financeiras.",
+        },
+        {
+            "name": "Movimentos",
+            "description": "Receitas e despesas financeiras.",
+        },
+        {
+            "name": "Planejamento",
+            "description": "Planejamento de receitas e despesas futuras.",
+        },
+        {
+            "name": "Transferências",
+            "description": "Transferências entre contas financeiras.",
+        },
+        {
+            "name": "Relatórios",
+            "description": "Consultas e relatórios financeiros.",
+        },
+    ],
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

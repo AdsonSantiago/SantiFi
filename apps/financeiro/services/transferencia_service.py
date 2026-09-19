@@ -1,8 +1,11 @@
 from django.db import transaction
-from apps.financeiro.models import Movimento
-from apps.financeiro.services.movimento_service import MovimentoService
+
+from apps.core.enums.tipo_categoria import TipoCategoria
+from apps.core.enums.tipo_movimento import TipoMovimento
 from apps.core.exceptions.transferencia import TransferenciaException
-from apps.financeiro.models.categoria import Categoria
+from apps.financeiro.models import Categoria, Transferencia
+from apps.financeiro.services.movimento_service import MovimentoService
+
 
 class TransferenciaService:
 
@@ -13,10 +16,8 @@ class TransferenciaService:
         usuario,
         conta_origem,
         conta_destino,
-        categoria,
         valor,
-        descricao,
-        data_movimento,
+        data_transferencia,
         observacao=None,
     ):
         if conta_origem == conta_destino:
@@ -39,34 +40,48 @@ class TransferenciaService:
                 "A conta de destino está inativa."
             )
 
-        if categoria.tipo != Categoria.TipoCategoria.TRANSFERENCIA:
+        categoria = Categoria.objects.filter(
+            usuario=usuario,
+            tipo=TipoCategoria.TRANSFERENCIA,
+            ativo=True,
+        ).first()
+
+        if categoria is None:
             raise TransferenciaException(
-                "A categoria deve ser do tipo Transferência."
+                "Nenhuma categoria de transferência ativa foi encontrada."
             )
 
-        movimento_saida = MovimentoService.criar_movimento(
+        transferencia = Transferencia.objects.create(
+            usuario=usuario,
+            conta_origem=conta_origem,
+            conta_destino=conta_destino,
+            valor=valor,
+            data_transferencia=data_transferencia,
+            observacao=observacao,
+        )
+
+        MovimentoService.criar_movimento(
             usuario=usuario,
             conta=conta_origem,
             categoria=categoria,
-            tipo=Movimento.TipoMovimento.DESPESA,
-            descricao=descricao,
+            tipo=TipoMovimento.DESPESA,
+            descricao=f"Transferência para {conta_destino.nome}",
             valor=valor,
-            data_movimento=data_movimento,
+            data_movimento=data_transferencia,
             observacao=observacao,
+            transferencia=transferencia,
         )
 
-        movimento_entrada = MovimentoService.criar_movimento(
+        MovimentoService.criar_movimento(
             usuario=usuario,
             conta=conta_destino,
             categoria=categoria,
-            tipo=Movimento.TipoMovimento.RECEITA,
-            descricao=descricao,
+            tipo=TipoMovimento.RECEITA,
+            descricao=f"Transferência de {conta_origem.nome}",
             valor=valor,
-            data_movimento=data_movimento,
+            data_movimento=data_transferencia,
             observacao=observacao,
+            transferencia=transferencia,
         )
 
-        return {
-            "saida": movimento_saida,
-            "entrada": movimento_entrada,
-        }
+        return transferencia

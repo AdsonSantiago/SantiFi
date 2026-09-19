@@ -19,6 +19,4 @@ class BaseViewSet(ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        serializer.save(
-            usuario=self.request.user
-        )
+        serializer.save(usuario=self.request.user)

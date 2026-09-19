@@ -18,7 +18,6 @@ class PlanejamentoFilter(filters.FilterSet):
     class Meta:
 
         model = PlanejamentoFinanceiro
-
         fields = [
             "status",
             "tipo",

@@ -4,8 +4,17 @@ from apps.financeiro.models import Categoria
 
 
 class CategoriaSerializer(serializers.ModelSerializer):
+
     def validate_nome(self, value):
-        return value.strip().title()
+        value = value.strip().title()
+
+        if not value:
+            raise serializers.ValidationError(
+                "O nome da categoria não pode ser vazio."
+            )
+
+        return value
+
     class Meta:
         model = Categoria
 

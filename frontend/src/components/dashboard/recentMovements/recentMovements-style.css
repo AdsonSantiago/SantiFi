@@ -1,0 +1,36 @@
+.movements-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.movements-table th,
+.movements-table td {
+    padding: 14px 10px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.movements-table th {
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.movements-table td {
+    font-size: 14px;
+}
+
+.movements-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.movement-income {
+    color: #16a34a;
+    font-weight: 600;
+}
+
+.movement-expense {
+    color: #dc2626;
+    font-weight: 600;
+}
+
