@@ -1,4 +1,9 @@
 {
-  "installCommand": "pip install -r requirements.txt",
-  "framework": "django"
+  "builds": [{
+    "src": "seu_projeto/wsgi.py",
+    "use": "@vercel/python"
+  }],
+  "routes": [
+    {"src": "/(.*)", "dest": "seu_projeto/wsgi.py"}
+  ]
 }
