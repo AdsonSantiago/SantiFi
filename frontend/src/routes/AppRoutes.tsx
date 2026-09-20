@@ -2,6 +2,7 @@ import {
     BrowserRouter,
     Routes,
     Route,
+    Navigate,
 } from "react-router-dom";
 
 import Login from "../pages/login/Login";
@@ -16,32 +17,20 @@ function AppRoutes() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route
-                    path="/login"
-                    element={<Login />}
-                />
+                <Route path="/" element={<Navigate to="/login" replace />} />
+                <Route path="/login" element={<Login />} />
 
                 <Route element={<ProtectedRoute />}>
                     <Route element={<MainLayout />}>
-
-                        <Route
-                            path="/dashboard"
-                            element={<Dashboard />}
-                        />
-                        <Route
-                            path="/movimentos"
-                            element={<Movimentos />}
-                        />
-                        <Route
-                            path="/contas"
-                            element={<Contas />}
-                        />
-                        <Route
-                            path="/categorias"
-                            element={<Categorias />}
-                        />
+                        <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/movimentos" element={<Movimentos />} />
+                        <Route path="/contas" element={<Contas />} />
+                        <Route path="/categorias" element={<Categorias />} />
                     </Route>                    
                 </Route>
+
+                {/* Qualquer rota inexistente volta pro login */}
+                <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
         </BrowserRouter>
     );

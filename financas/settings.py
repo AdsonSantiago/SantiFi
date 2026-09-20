@@ -148,7 +148,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True  # durante desenvolvimento
+CORS_ALLOWED_ORIGINS = [
+    "https://sua-url-web.vercel.app",
+    "http://localhost:5173",
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
