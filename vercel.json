@@ -1,9 +1,13 @@
 {
+  "version": 2,
   "builds": [{
-    "src": "seu_projeto/wsgi.py",
+    "src": "financas/wsgi.py",
     "use": "@vercel/python"
   }],
   "routes": [
-    {"src": "/(.*)", "dest": "seu_projeto/wsgi.py"}
+    {
+      "src": "/(.*)",
+      "dest": "financas/wsgi.py"
+    }
   ]
 }
