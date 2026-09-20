@@ -10,19 +10,19 @@ from drf_spectacular.views import (
 from django.http import JsonResponse
 import os
 
-def debug_env(request):
-    return JsonResponse({
-        "SECRET_KEY_present": bool(os.getenv("SECRET_KEY")),
-        "DEBUG": os.getenv("DEBUG", "não definido"),
-        "DATABASE_URL_present": bool(os.getenv("DATABASE_URL")),
-        "enviroment": "Vercel",
-    })
+# def debug_env(request):
+#     return JsonResponse({
+#         "SECRET_KEY_present": bool(os.getenv("SECRET_KEY")),
+#         "DEBUG": os.getenv("DEBUG", "não definido"),
+#         "DATABASE_URL_present": bool(os.getenv("DATABASE_URL")),
+#         "enviroment": "Vercel",
+#     })
 
 
 
 
 urlpatterns = [
-    path('debug-env/', debug_env),
+    # path('debug-env/', debug_env),
     path("admin/", admin.site.urls),
 
     path("api/financeiro/", include("apps.financeiro.urls")),
