@@ -1,16 +1,14 @@
-"""
-WSGI config for financas project.
-
-It exposes the WSGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/5.0/howto/deployment/wsgi/
-"""
-
 import os
+import sys
+from pathlib import Path
 
-from django.core.wsgi import get_wsgi_application
+# Caminho absoluto para a raiz do projeto
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Adiciona a raiz ao PYTHONPATH (ISSO RESOLVE 90% DOS PROBLEMAS)
+sys.path.insert(0, str(BASE_DIR))
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'financas.settings')
 
+from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
