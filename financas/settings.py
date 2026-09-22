@@ -26,12 +26,12 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "0") == "1"
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    ".vercel.app",
+ALLOWED_HOSTS = os.getenv(
+    "ALLOWED_HOSTS",
+    "localhost,127.0.0.1,.vercel.app"
+).split(",")
     # ".now.sh",
-]
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -168,16 +168,15 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "https://santifi.vercel.app",
-    "http://localhost:5173",
-]
+CORS_ALLOWED_ORIGINS = os.getenv(
+    "CORS_ALLOWED_ORIGINS",
+    "http://localhost:5173"
+).split(",")
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://santifi.vercel.app",
-    "https://*.vercel.app",
-    "http://localhost:5173",
-]
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    "CSRF_TRUSTED_ORIGINS",
+    "http://localhost:5173"
+).split(",")
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
