@@ -20,7 +20,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-hw0w=o#_%ysx*hh+8b$j_r-*n@lw)z#j!loercr&ncv8bc3l83")
+SECRET_KEY = os.getenv("SECRET_KEY")
+# SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-hw0w=o#_%ysx*hh+8b$j_r-*n@lw)z#j!loercr&ncv8bc3l83")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "0") == "1"
@@ -29,7 +30,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     ".vercel.app",
-    ".now.sh",
+    # ".now.sh",
 ]
 # Application definition
 
