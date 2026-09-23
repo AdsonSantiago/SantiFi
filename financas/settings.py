@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     "apps.authentication",
     'corsheaders',
 
-    # 'apps.relatorios',
     'apps.usuarios',
     'apps.financeiro',
     'apps.core',
