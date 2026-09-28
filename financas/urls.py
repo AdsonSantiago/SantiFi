@@ -7,22 +7,38 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
+from django.db import connection
 from django.http import JsonResponse
-import os
 
-# def debug_env(request):
-#     return JsonResponse({
-#         "SECRET_KEY_present": bool(os.getenv("SECRET_KEY")),
-#         "DEBUG": os.getenv("DEBUG", "não definido"),
-#         "DATABASE_URL_present": bool(os.getenv("DATABASE_URL")),
-#         "enviroment": "Vercel",
-#     })
 
+def diagnostico_banco(request):
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            resultado = cursor.fetchone()
+
+        return JsonResponse({
+            "status": "ok",
+            "database": connection.vendor,
+            "host": connection.settings_dict.get("HOST"),
+            "name": connection.settings_dict.get("NAME"),
+            "teste": resultado[0] == 1,
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            "status": "erro",
+            "erro": str(e),
+        }, status=500)
 
 
 
 urlpatterns = [
-    # path('debug-env/', debug_env),
+    path(
+    "api/diagnostico/banco/",
+    diagnostico_banco,
+    ),
+    
     path("admin/", admin.site.urls),
 
     path("api/financeiro/", include("apps.financeiro.urls")),
