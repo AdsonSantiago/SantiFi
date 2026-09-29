@@ -12,6 +12,7 @@ import MainLayout from "../components/layout/MainLayout";
 import Movimentos from "../pages/movimentos/Movimentos";
 import Contas from "../pages/contas/Contas";
 import Categorias from "../pages/categorias/Categorias";
+import Cadastro from "../pages/cadastro/Cadastro";
 
 function AppRoutes() {
     return (
@@ -19,7 +20,11 @@ function AppRoutes() {
             <Routes>
                 <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="/login" element={<Login />} />
-
+                <Route
+                    path="/cadastro"
+                    element={<Cadastro />}
+                />
+                
                 <Route element={<ProtectedRoute />}>
                     <Route element={<MainLayout />}>
                         <Route path="/dashboard" element={<Dashboard />} />

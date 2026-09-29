@@ -191,7 +191,7 @@ function Login() {
 
           <p className="register-text">
             Ainda não possui uma conta?{" "}
-            <a href="/register">Criar conta</a>
+            <a href="/cadastro">Criar conta</a>
           </p>
         </div>
       </section>
