@@ -1,4 +1,14 @@
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import { NavLink } from "react-router-dom";
+
+import {
+  getCurrentUser,
+  type CurrentUser,
+} from "../../../services/authService";
 
 import "./sidebar.css";
 
@@ -39,6 +49,53 @@ function Sidebar({
   onClose,
   onToggleCollapse,
 }: SidebarProps) {
+  const [user, setUser] = useState<CurrentUser | null>(
+    null,
+  );
+
+  const [userLoading, setUserLoading] = useState(true);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function carregarUsuario() {
+      try {
+        const currentUser = await getCurrentUser();
+
+        if (!ignore) {
+          setUser(currentUser);
+        }
+      } catch (error) {
+        console.error(
+          "Não foi possível carregar o usuário:",
+          error,
+        );
+      } finally {
+        if (!ignore) {
+          setUserLoading(false);
+        }
+      }
+    }
+
+    carregarUsuario();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const fullName = user
+    ? `${user.nome} ${user.sobrenome}`.trim()
+    : userLoading
+      ? "Carregando..."
+      : "Usuário";
+
+  const initials = user
+    ? `${user.nome?.[0] ?? ""}${user.sobrenome?.[0] ?? ""}`.toUpperCase()
+    : userLoading
+      ? "--"
+      : "US";
+
   return (
     <>
       {isOpen && (
@@ -52,16 +109,23 @@ function Sidebar({
 
       <aside
         id="main-sidebar"
-        className={`sidebar ${isOpen ? "sidebar-open" : ""} ${
+        className={`sidebar ${
+          isOpen ? "sidebar-open" : ""
+        } ${
           collapsed ? "sidebar-collapsed" : ""
         }`}
       >
         <div className="sidebar-top">
           <div className="sidebar-logo">
-            <span className="sidebar-logo-icon">F</span>
+            <span
+              className="sidebar-logo-icon"
+              aria-hidden="true"
+            >
+              S
+            </span>
 
             <div className="sidebar-brand-text">
-              <strong>Financeiro</strong>
+              <strong>SantiFi</strong>
               <span>Controle inteligente</span>
             </div>
           </div>
@@ -80,13 +144,17 @@ function Sidebar({
           className="sidebar-collapse-button"
           type="button"
           aria-label={
-            collapsed ? "Expandir menu lateral" : "Recolher menu lateral"
+            collapsed
+              ? "Expandir menu lateral"
+              : "Recolher menu lateral"
           }
           aria-expanded={!collapsed}
           aria-controls="main-sidebar"
           onClick={onToggleCollapse}
         >
-          <span aria-hidden="true">{collapsed ? "→" : "←"}</span>
+          <span aria-hidden="true">
+            {collapsed ? "→" : "←"}
+          </span>
         </button>
 
         <nav
@@ -105,7 +173,9 @@ function Sidebar({
               onClick={onClose}
               title={collapsed ? item.label : undefined}
               className={({ isActive }) =>
-                `sidebar-link ${isActive ? "active" : ""}`
+                `sidebar-link ${
+                  isActive ? "active" : ""
+                }`
               }
             >
               <span
@@ -130,9 +200,15 @@ function Sidebar({
           <NavLink
             to="/configuracoes"
             onClick={onClose}
-            title={collapsed ? "Configurações" : undefined}
+            title={
+              collapsed
+                ? "Configurações"
+                : undefined
+            }
             className={({ isActive }) =>
-              `sidebar-link ${isActive ? "active" : ""}`
+              `sidebar-link ${
+                isActive ? "active" : ""
+              }`
             }
           >
             <span
@@ -148,10 +224,15 @@ function Sidebar({
           </NavLink>
 
           <div className="sidebar-user">
-            <div className="sidebar-avatar">AS</div>
+            <div
+              className="sidebar-avatar"
+              aria-hidden="true"
+            >
+              {initials}
+            </div>
 
             <div className="sidebar-user-info">
-              <strong>Adson Santiago</strong>
+              <strong>{fullName}</strong>
               <span>Conta pessoal</span>
             </div>
           </div>

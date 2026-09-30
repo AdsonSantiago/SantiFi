@@ -49,8 +49,8 @@ function Login() {
 
         <div className="visual-header">
           <div className="brand">
-            <span className="brand-icon">F</span>
-            <span>Financeiro</span>
+            <span className="brand-icon">S</span>
+            <span>SantiFi</span>
           </div>
 
           <span className="system-status">
@@ -59,7 +59,7 @@ function Login() {
           </span>
         </div>
 
-        <div className="visual-content">
+        {/* <div className="visual-content">
           <p className="eyebrow">CONTROLE INTELIGENTE</p>
 
           <h1>
@@ -72,7 +72,28 @@ function Login() {
             Uma nova forma de acompanhar sua vida financeira com clareza,
             inteligência e controle.
           </p>
-        </div>
+        </div> */}
+
+        <div className="visual-content">
+          <p className="eyebrow">
+            CONTROLE INTELIGENTE
+          </p>
+
+          <h1 aria-label="Seu dinheiro. Sua evolução.">
+            <span className="headline-line headline-line-one">
+              Seu dinheiro<span className="headline-dot">.</span>
+            </span>
+
+            <span className="headline-line headline-line-two">
+              Sua evolução<span className="headline-dot">.</span>
+            </span>
+          </h1>
+
+          <p className="visual-description">
+            Uma nova forma de acompanhar sua vida financeira com clareza,
+            inteligência e controle.
+          </p>
+        </div>        
 
         <div className="visual-signature">
           <div className="signature-line" aria-hidden="true" />
@@ -102,8 +123,8 @@ function Login() {
       <section className="login-container">
         <div className="login-card">
           <div className="mobile-brand">
-            <span className="brand-icon">F</span>
-            <span>Financeiro</span>
+            <span className="brand-icon">S</span>
+            <span>SantiFi</span>
           </div>
 
           <div className="login-heading">
