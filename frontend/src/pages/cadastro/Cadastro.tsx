@@ -1,282 +1,342 @@
-import { useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import {
-    createUsuario,
-} from "../../services/usuarioService";
+import { createUsuario } from "../../services/usuarioService";
 
 import "./cadastro.css";
 
 function Cadastro() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const redirectTimer = useRef<number | null>(null);
 
-    const [nome, setNome] = useState("");
-    const [sobrenome, setSobrenome] = useState("");
-    const [email, setEmail] = useState("");
-    const [senha, setSenha] = useState("");
-    const [confirmarSenha, setConfirmarSenha] = useState("");
-    const [timezone, setTimezone] = useState(
-        "America/Sao_Paulo"
-    );
+  const [nome, setNome] = useState("");
+  const [sobrenome, setSobrenome] = useState("");
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [confirmarSenha, setConfirmarSenha] = useState("");
+  const [timezone, setTimezone] = useState(
+    "America/Sao_Paulo",
+  );
 
-    const [erro, setErro] = useState("");
-    const [sucesso, setSucesso] = useState("");
-    const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState("");
+  const [sucesso, setSucesso] = useState("");
+  const [carregando, setCarregando] = useState(false);
 
-    async function handleSubmit(
-        event: FormEvent<HTMLFormElement>
-    ) {
-        event.preventDefault();
+  useEffect(() => {
+    return () => {
+      if (redirectTimer.current !== null) {
+        window.clearTimeout(redirectTimer.current);
+      }
+    };
+  }, []);
 
-        setErro("");
-        setSucesso("");
+  function limparMensagens() {
+    setErro("");
+    setSucesso("");
+  }
 
-        if (senha !== confirmarSenha) {
-            setErro("As senhas não conferem.");
-            return;
-        }
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>,
+  ) {
+    event.preventDefault();
 
-        try {
-            setCarregando(true);
+    limparMensagens();
 
-            await createUsuario({
-                nome,
-                sobrenome,
-                email,
-                senha,
-                confirmar_senha: confirmarSenha,
-                timezone,
-            });
+    const nomeNormalizado = nome.trim();
+    const sobrenomeNormalizado = sobrenome.trim();
+    const emailNormalizado = email.trim().toLowerCase();
 
-            setSucesso(
-                "Usuário criado com sucesso! Você já pode fazer login."
-            );
-
-            setTimeout(() => {
-                navigate("/login");
-            }, 1500);
-
-        } catch (error) {
-            console.error(
-                "Erro ao criar usuário:",
-                error
-            );
-
-            setErro(
-                "Não foi possível criar o usuário."
-            );
-        } finally {
-            setCarregando(false);
-        }
+    if (!nomeNormalizado || !sobrenomeNormalizado) {
+      setErro("Informe seu nome e sobrenome.");
+      return;
     }
 
-    return (
-        <main className="cadastro-page">
-            <section className="cadastro-card">
+    if (senha.length < 8) {
+      setErro("A senha deve ter pelo menos 8 caracteres.");
+      return;
+    }
 
-                <div className="cadastro-header">
-                    <span className="cadastro-eyebrow">
-                        SANTIFI
-                    </span>
+    if (senha !== confirmarSenha) {
+      setErro("As senhas não conferem.");
+      return;
+    }
 
-                    <h1>
-                        Criar sua conta
-                    </h1>
+    try {
+      setCarregando(true);
 
-                    <p>
-                        Cadastre-se para começar a
-                        organizar sua vida financeira.
-                    </p>
-                </div>
+      await createUsuario({
+        nome: nomeNormalizado,
+        sobrenome: sobrenomeNormalizado,
+        email: emailNormalizado,
+        senha,
+        confirmar_senha: confirmarSenha,
+        timezone,
+      });
 
-                <form
-                    className="cadastro-form"
-                    onSubmit={handleSubmit}
-                >
-                    <div className="cadastro-row">
+      setSucesso(
+        "Usuário criado com sucesso! Você já pode fazer login.",
+      );
 
-                        <div className="cadastro-field">
-                            <label htmlFor="nome">
-                                Nome
-                            </label>
+      redirectTimer.current = window.setTimeout(() => {
+        navigate("/login");
+      }, 1500);
+    } catch (error) {
+      console.error("Erro ao criar usuário:", error);
 
-                            <input
-                                id="nome"
-                                type="text"
-                                value={nome}
-                                onChange={(event) =>
-                                    setNome(
-                                        event.target.value
-                                    )
-                                }
-                                placeholder="Seu nome"
-                                required
-                            />
-                        </div>
+      setErro(
+        "Não foi possível criar o usuário. Verifique os dados e tente novamente.",
+      );
+    } finally {
+      setCarregando(false);
+    }
+  }
 
-                        <div className="cadastro-field">
-                            <label htmlFor="sobrenome">
-                                Sobrenome
-                            </label>
+  return (
+    <main className="cadastro-page">
+      <div className="cadastro-background-glow cadastro-glow-one" />
+      <div className="cadastro-background-glow cadastro-glow-two" />
+      <div className="cadastro-grid" />
 
-                            <input
-                                id="sobrenome"
-                                type="text"
-                                value={sobrenome}
-                                onChange={(event) =>
-                                    setSobrenome(
-                                        event.target.value
-                                    )
-                                }
-                                placeholder="Seu sobrenome"
-                                required
-                            />
-                        </div>
+      <section className="cadastro-card">
+        <header className="cadastro-header">
+          <div className="cadastro-brand">
+            <span className="cadastro-logo">S</span>
 
-                    </div>
+            <span className="cadastro-brand-name">
+              SANTIFI
+            </span>
+          </div>
 
-                    <div className="cadastro-field">
-                        <label htmlFor="email">
-                            E-mail
-                        </label>
+          <p className="cadastro-eyebrow">
+            NOVO COMEÇO FINANCEIRO
+          </p>
 
-                        <input
-                            id="email"
-                            type="email"
-                            value={email}
-                            onChange={(event) =>
-                                setEmail(
-                                    event.target.value
-                                )
-                            }
-                            placeholder="seu@email.com"
-                            required
-                        />
-                    </div>
+          <h1>Criar sua conta</h1>
 
-                    <div className="cadastro-row">
+          <p className="cadastro-description">
+            Cadastre-se para começar a organizar sua vida
+            financeira com clareza e controle.
+          </p>
+        </header>
 
-                        <div className="cadastro-field">
-                            <label htmlFor="senha">
-                                Senha
-                            </label>
+        <form
+          className="cadastro-form"
+          onSubmit={handleSubmit}
+          noValidate
+        >
+          <div className="cadastro-row">
+            <div className="cadastro-field">
+              <label htmlFor="nome">
+                Nome
+                <span aria-hidden="true">*</span>
+              </label>
 
-                            <input
-                                id="senha"
-                                type="password"
-                                value={senha}
-                                onChange={(event) =>
-                                    setSenha(
-                                        event.target.value
-                                    )
-                                }
-                                placeholder="Mínimo 8 caracteres"
-                                minLength={8}
-                                required
-                            />
-                        </div>
+              <input
+                id="nome"
+                name="nome"
+                type="text"
+                value={nome}
+                onChange={(event) => {
+                  setNome(event.target.value);
+                  limparMensagens();
+                }}
+                placeholder="Seu nome"
+                autoComplete="given-name"
+                maxLength={80}
+                required
+              />
+            </div>
 
-                        <div className="cadastro-field">
-                            <label htmlFor="confirmar-senha">
-                                Confirmar senha
-                            </label>
+            <div className="cadastro-field">
+              <label htmlFor="sobrenome">
+                Sobrenome
+                <span aria-hidden="true">*</span>
+              </label>
 
-                            <input
-                                id="confirmar-senha"
-                                type="password"
-                                value={confirmarSenha}
-                                onChange={(event) =>
-                                    setConfirmarSenha(
-                                        event.target.value
-                                    )
-                                }
-                                placeholder="Repita sua senha"
-                                minLength={8}
-                                required
-                            />
-                        </div>
+              <input
+                id="sobrenome"
+                name="sobrenome"
+                type="text"
+                value={sobrenome}
+                onChange={(event) => {
+                  setSobrenome(event.target.value);
+                  limparMensagens();
+                }}
+                placeholder="Seu sobrenome"
+                autoComplete="family-name"
+                maxLength={80}
+                required
+              />
+            </div>
+          </div>
 
-                    </div>
+          <div className="cadastro-field">
+            <label htmlFor="email">
+              E-mail
+              <span aria-hidden="true">*</span>
+            </label>
 
-                    <div className="cadastro-field">
-                        <label htmlFor="timezone">
-                            Fuso horário
-                        </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              value={email}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                limparMensagens();
+              }}
+              placeholder="seu@email.com"
+              autoComplete="email"
+              required
+            />
+          </div>
 
-                        <select
-                            id="timezone"
-                            value={timezone}
-                            onChange={(event) =>
-                                setTimezone(
-                                    event.target.value
-                                )
-                            }
-                        >
-                            <option value="America/Sao_Paulo">
-                                São Paulo
-                            </option>
+          <div className="cadastro-row">
+            <div className="cadastro-field">
+              <label htmlFor="senha">
+                Senha
+                <span aria-hidden="true">*</span>
+              </label>
 
-                            <option value="America/Manaus">
-                                Manaus
-                            </option>
+              <input
+                id="senha"
+                name="senha"
+                type="password"
+                value={senha}
+                onChange={(event) => {
+                  setSenha(event.target.value);
+                  limparMensagens();
+                }}
+                placeholder="Mínimo 8 caracteres"
+                autoComplete="new-password"
+                minLength={8}
+                required
+              />
 
-                            <option value="America/Belem">
-                                Belém
-                            </option>
+              <small className="cadastro-hint">
+                Use pelo menos 8 caracteres.
+              </small>
+            </div>
 
-                            <option value="America/Fortaleza">
-                                Fortaleza
-                            </option>
+            <div className="cadastro-field">
+              <label htmlFor="confirmar-senha">
+                Confirmar senha
+                <span aria-hidden="true">*</span>
+              </label>
 
-                            <option value="America/Recife">
-                                Recife
-                            </option>
-                        </select>
-                    </div>
+              <input
+                id="confirmar-senha"
+                name="confirmar_senha"
+                type="password"
+                value={confirmarSenha}
+                onChange={(event) => {
+                  setConfirmarSenha(event.target.value);
+                  limparMensagens();
+                }}
+                placeholder="Repita sua senha"
+                autoComplete="new-password"
+                minLength={8}
+                required
+              />
+            </div>
+          </div>
 
-                    {erro && (
-                        <div
-                            className="cadastro-message cadastro-error"
-                            role="alert"
-                        >
-                            {erro}
-                        </div>
-                    )}
+          <div className="cadastro-field">
+            <label htmlFor="timezone">
+              Fuso horário
+              <span aria-hidden="true">*</span>
+            </label>
 
-                    {sucesso && (
-                        <div
-                            className="cadastro-message cadastro-success"
-                            role="status"
-                        >
-                            {sucesso}
-                        </div>
-                    )}
+            <select
+              id="timezone"
+              name="timezone"
+              value={timezone}
+              onChange={(event) =>
+                setTimezone(event.target.value)
+              }
+              required
+            >
+              <option value="America/Sao_Paulo">
+                São Paulo
+              </option>
 
-                    <button
-                        type="submit"
-                        className="cadastro-submit"
-                        disabled={carregando}
-                    >
-                        {carregando
-                            ? "Criando conta..."
-                            : "Criar conta"}
-                    </button>
-                </form>
+              <option value="America/Manaus">
+                Manaus
+              </option>
 
-                <div className="cadastro-footer">
-                    <span>
-                        Já possui uma conta?
-                    </span>
+              <option value="America/Belem">
+                Belém
+              </option>
 
-                    <Link to="/login">
-                        Entrar
-                    </Link>
-                </div>
+              <option value="America/Fortaleza">
+                Fortaleza
+              </option>
 
-            </section>
-        </main>
-    );
+              <option value="America/Recife">
+                Recife
+              </option>
+            </select>
+          </div>
+
+          {erro && (
+            <div
+              className="cadastro-message cadastro-error"
+              role="alert"
+            >
+              <span aria-hidden="true">!</span>
+              {erro}
+            </div>
+          )}
+
+          {sucesso && (
+            <div
+              className="cadastro-message cadastro-success"
+              role="status"
+            >
+              <span aria-hidden="true">✓</span>
+              {sucesso}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className="cadastro-submit"
+            disabled={carregando}
+          >
+            {carregando ? (
+              <>
+                <span
+                  className="cadastro-spinner"
+                  aria-hidden="true"
+                />
+                Criando conta...
+              </>
+            ) : (
+              "Criar conta"
+            )}
+          </button>
+        </form>
+
+        <footer className="cadastro-footer">
+          <span>Já possui uma conta?</span>
+
+          <Link to="/login">Entrar</Link>
+        </footer>
+
+        <div className="cadastro-signature">
+          <span className="cadastro-signature-line" />
+
+          <span>Secure access · © 2026 SANTIFI</span>
+        </div>
+      </section>
+    </main>
+  );
 }
 
 export default Cadastro;
