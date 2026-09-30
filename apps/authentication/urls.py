@@ -8,6 +8,11 @@ from apps.authentication.viewsets.auth_viewset import (
     LoginView,
 )
 
+from apps.usuarios.viewsets.usuario_viewset import (
+    CadastroUsuarioView,
+)
+
+
 urlpatterns = [
 
     path(
@@ -21,4 +26,11 @@ urlpatterns = [
         TokenRefreshView.as_view(),
         name="refresh",
     ),
+
+    path(
+        "cadastro/",
+        CadastroUsuarioView.as_view(),
+        name="cadastro",
+    ),
+
 ]

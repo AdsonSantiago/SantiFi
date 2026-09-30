@@ -3,7 +3,7 @@ from zoneinfo import available_timezones
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 
-from .managers import UsuarioManager
+from apps.usuarios.managers import UsuarioManager
 
 class Perfil(models.Model):
     codigo = models.CharField(max_length=30,unique=True
