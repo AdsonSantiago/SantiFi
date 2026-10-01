@@ -55,6 +55,13 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         unique=True
     )
 
+    google_id = models.CharField(
+        max_length=255,
+        unique=True,
+        null=True,
+        blank=True,
+    )
+
     timezone = models.CharField(
         max_length=50,
         choices=timezones_choices(),

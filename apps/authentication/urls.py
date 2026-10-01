@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import (
 )
 
 from apps.authentication.viewsets.auth_viewset import (
-    LoginView,
+    LoginView, GoogleLoginView
 )
 
 from apps.usuarios.viewsets.usuario_viewset import (
@@ -21,6 +21,12 @@ urlpatterns = [
         name="login",
     ),
 
+    path(
+        "google/",
+        GoogleLoginView.as_view(),
+        name="google-login",
+    ),
+    
     path(
         "refresh/",
         TokenRefreshView.as_view(),

@@ -21,7 +21,8 @@ sys.path.insert(0, str(BASE_DIR))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY")
-# SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-hw0w=o#_%ysx*hh+8b$j_r-*n@lw)z#j!loercr&ncv8bc3l83")
+
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "0") == "1"

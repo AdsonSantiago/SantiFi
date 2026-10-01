@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -11,6 +11,9 @@ function Login() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const googleButtonRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
 
@@ -40,6 +43,50 @@ function Login() {
     }
   };
 
+  useEffect(() => {
+    if (!window.google || !googleButtonRef.current) {
+      return;
+    }
+
+    window.google.accounts.id.initialize({
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+
+      callback: async (response) => {
+        setError("");
+        setGoogleLoading(true);
+
+        try {
+          const result = await api.post("/auth/google/", {
+            credential: response.credential,
+          });
+
+          const { access, refresh } = result.data;
+
+          localStorage.setItem("access_token", access);
+          localStorage.setItem("refresh_token", refresh);
+
+          navigate("/dashboard", { replace: true });
+        } catch (error) {
+          console.error(error);
+          setError("Não foi possível entrar com o Google.");
+        } finally {
+          setGoogleLoading(false);
+        }
+      },
+    });
+
+    window.google.accounts.id.renderButton(
+      googleButtonRef.current,
+      {
+        theme: "outline",
+        size: "large",
+        text: "continue_with",
+        shape: "rectangular",
+        width: 360,
+      }
+    );
+  }, [navigate]);
+
   return (
     <main className="login-page">
       <section className="login-visual">
@@ -58,21 +105,6 @@ function Login() {
             SISTEMA ONLINE
           </span>
         </div>
-
-        {/* <div className="visual-content">
-          <p className="eyebrow">CONTROLE INTELIGENTE</p>
-
-          <h1>
-            Seu dinheiro.
-            <br />
-            Sua evolução.
-          </h1>
-
-          <p>
-            Uma nova forma de acompanhar sua vida financeira com clareza,
-            inteligência e controle.
-          </p>
-        </div> */}
 
         <div className="visual-content">
           <p className="eyebrow">
@@ -93,7 +125,7 @@ function Login() {
             Uma nova forma de acompanhar sua vida financeira com clareza,
             inteligência e controle.
           </p>
-        </div>        
+        </div>
 
         <div className="visual-signature">
           <div className="signature-line" aria-hidden="true" />
@@ -113,11 +145,11 @@ function Login() {
             © 2026 · Financeiro
           </span>
         </div>
+
         <div className="visual-footer">
           <span>SECURE ACCESS</span>
           <span>v1.0.0</span>
         </div>
-
       </section>
 
       <section className="login-container">
@@ -205,10 +237,16 @@ function Login() {
             <span>ou continue com</span>
           </div>
 
-          <button type="button" className="google-button">
-            <span className="google-icon">G</span>
-            Continuar com Google
-          </button>
+          <div
+            ref={googleButtonRef}
+            className="google-button-container"
+          />
+
+          {googleLoading && (
+            <p className="google-loading">
+              Autenticando com Google...
+            </p>
+          )}
 
           <p className="register-text">
             Ainda não possui uma conta?{" "}
