@@ -78,11 +78,13 @@ function Login() {
     window.google.accounts.id.renderButton(
       googleButtonRef.current,
       {
+        // type: "standard",
         theme: "outline",
         size: "large",
         text: "continue_with",
         shape: "rectangular",
-        width: 360,
+        width: Math.min( 360,
+        googleButtonRef.current.clientWidth)
       }
     );
   }, [navigate]);
@@ -240,10 +242,11 @@ function Login() {
           <div
             ref={googleButtonRef}
             className="google-button-container"
+            aria-label="Entrar com o Google"
           />
 
           {googleLoading && (
-            <p className="google-loading">
+            <p className="google-loading" role="status">
               Autenticando com Google...
             </p>
           )}

@@ -6,6 +6,7 @@ from apps.usuarios.serializers.usuario_me_serializer import (
     UsuarioMeSerializer,
 )
 
+
 class MeView(APIView):
 
     permission_classes = [IsAuthenticated]

@@ -11,7 +11,6 @@ from django.db import connection
 from django.http import JsonResponse
 
 # teste de conecxão com o banco
-
 # def diagnostico_banco(request):
 #     try:
 #         with connection.cursor() as cursor:
@@ -35,6 +34,7 @@ from django.http import JsonResponse
 
 
 urlpatterns = [
+    # teste de conexap com o bancco
     # path(
     # "api/diagnostico/banco/",
     # diagnostico_banco,

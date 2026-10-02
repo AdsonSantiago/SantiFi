@@ -15,6 +15,7 @@ export interface Usuario {
     sobrenome: string;
     email: string;
     timezone: string;
+    google_id: string | null;
 }
 
 export async function createUsuario(
@@ -30,4 +31,10 @@ export async function createUsuario(
     );
 
     return response.data.usuario;
+}
+
+export async function getUsuarioAtual(): Promise<Usuario> {
+    const response = await api.get<Usuario>("/auth/me/");
+
+    return response.data;
 }

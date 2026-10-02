@@ -1,5 +1,7 @@
 from django.urls import path
 
+from apps.authentication.views import MeView
+
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
@@ -39,4 +41,9 @@ urlpatterns = [
         name="cadastro",
     ),
 
+    path(
+        "me/",
+        MeView.as_view(),
+        name="me",
+    ),
 ]

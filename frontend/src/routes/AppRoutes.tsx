@@ -13,6 +13,7 @@ import Movimentos from "../pages/movimentos/Movimentos";
 import Contas from "../pages/contas/Contas";
 import Categorias from "../pages/categorias/Categorias";
 import Cadastro from "../pages/cadastro/Cadastro";
+import Configuracoes from "../pages/configuracoes/configuracoes";
 
 function AppRoutes() {
     return (
@@ -27,6 +28,7 @@ function AppRoutes() {
                 
                 <Route element={<ProtectedRoute />}>
                     <Route element={<MainLayout />}>
+                        <Route path="/configuracoes" element={<Configuracoes />} />
                         <Route path="/dashboard" element={<Dashboard />} />
                         <Route path="/movimentos" element={<Movimentos />} />
                         <Route path="/contas" element={<Contas />} />

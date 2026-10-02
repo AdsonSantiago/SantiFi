@@ -231,13 +231,6 @@
   }
 }
 
-
-
-
-
-
-
-
 .visual-content > p:not(.eyebrow) {
   max-width: 430px;
   color: var(--login-muted);
@@ -407,20 +400,6 @@
   height: 1px;
   content: "";
   background: var(--login-border);
-}
-
-.google-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  color: var(--login-text);
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.google-icon {
-  color: #f87171;
-  font-weight: 900;
 }
 
 .register-text {
