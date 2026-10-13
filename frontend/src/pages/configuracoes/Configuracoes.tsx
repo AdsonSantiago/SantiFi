@@ -204,10 +204,10 @@ function Configuracoes() {
               id="config-nome"
               type="text"
               value={nome}
-              onChange={(event) => setNome(event.target.value);
+              onChange={(event) => { setNome(event.target.value);
                   setError("");
                   setSuccess("");
-              }
+              }}
               autoComplete="given-name"
               maxLength={150}
               required
@@ -221,10 +221,10 @@ function Configuracoes() {
               id="config-sobrenome"
               type="text"
               value={sobrenome}
-              onChange={(event) => setSobrenome(event.target.value);
+              onChange={(event) => { setSobrenome(event.target.value);
                 setError("");
                 setSuccess("");
-              }
+              }}
               autoComplete="family-name"
               maxLength={150}
               required
@@ -238,10 +238,10 @@ function Configuracoes() {
               id="config-email"
               type="email"
               value={email}
-              onChange={(event) => setEmail(event.target.value);
+              onChange={(event) => { setEmail(event.target.value);
                 setError("");
                 setSuccess("");
-              }
+              }}
               autoComplete="email"
               maxLength={254}
               required
