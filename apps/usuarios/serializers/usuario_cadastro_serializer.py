@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 from apps.usuarios.models import Usuario
 
@@ -42,6 +44,11 @@ class UsuarioCadastroSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 "confirmar_senha": "As senhas não conferem."
             })
+
+        try:
+            validate_password(senha)
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError({"senha": list(exc.messages)})
 
         return attrs
 

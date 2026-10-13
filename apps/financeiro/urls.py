@@ -14,6 +14,7 @@ from apps.financeiro.viewsets.planejamento_viewset import PlanejamentoViewSet
 from apps.financeiro.viewsets.extrato_viewset import ExtratoViewSet
 from apps.financeiro.viewsets.dashboard_viewset import DashboardViewSet
 from apps.financeiro.viewsets.indicador_viewset import IndicadorViewSet
+from apps.financeiro.viewsets.movement_draft_viewset import MovementDraftView
 
 
 
@@ -80,4 +81,7 @@ router.register(
     basename="indicadores",
 )
 
-urlpatterns = router.urls
+urlpatterns += [
+    path("assistente/movimento/", MovementDraftView.as_view(), name="movement-draft"),
+]
+urlpatterns += router.urls

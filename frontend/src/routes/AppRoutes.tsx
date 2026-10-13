@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import {
     BrowserRouter,
     Routes,
@@ -5,20 +6,22 @@ import {
     Navigate,
 } from "react-router-dom";
 
-import Login from "../pages/login/Login";
-import Dashboard from "../pages/dashboard/Dashboard";
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../components/layout/MainLayout";
-import Movimentos from "../pages/movimentos/Movimentos";
-import Contas from "../pages/contas/Contas";
-import Categorias from "../pages/categorias/Categorias";
-import Cadastro from "../pages/cadastro/Cadastro";
-import Configuracoes from "../pages/configuracoes/Configuracoes";
+
+const Login = lazy(() => import("../pages/login/Login"));
+const Dashboard = lazy(() => import("../pages/dashboard/Dashboard"));
+const Movimentos = lazy(() => import("../pages/movimentos/Movimentos"));
+const Contas = lazy(() => import("../pages/contas/Contas"));
+const Categorias = lazy(() => import("../pages/categorias/Categorias"));
+const Cadastro = lazy(() => import("../pages/cadastro/Cadastro"));
+const Configuracoes = lazy(() => import("../pages/configuracoes/Configuracoes"));
 
 function AppRoutes() {
     return (
         <BrowserRouter>
-            <Routes>
+            <Suspense fallback={<div className="route-loading" role="status">Carregando página...</div>}>
+              <Routes>
                 <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="/login" element={<Login />} />
                 <Route
@@ -38,7 +41,8 @@ function AppRoutes() {
 
                 {/* Qualquer rota inexistente volta pro login */}
                 <Route path="*" element={<Navigate to="/login" replace />} />
-            </Routes>
+              </Routes>
+            </Suspense>
         </BrowserRouter>
     );
 }

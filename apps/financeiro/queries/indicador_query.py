@@ -13,6 +13,7 @@ class IndicadorQuery:
             Movimento.objects.filter(
                 usuario=usuario,
                 tipo=TipoMovimento.RECEITA,
+                transferencia__isnull=True,
             ).aggregate(
                 total=Sum("valor")
             )["total"] or 0
@@ -25,6 +26,7 @@ class IndicadorQuery:
             Movimento.objects.filter(
                 usuario=usuario,
                 tipo=TipoMovimento.DESPESA,
+                transferencia__isnull=True,
             ).aggregate(
                 total=Sum("valor")
             )["total"] or 0

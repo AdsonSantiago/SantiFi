@@ -5,6 +5,7 @@ import { getMovements, deleteMovement } from "../../services/movementService";
 
 import MovimentosTable from "../../components/movimentos/movimentosTable";
 import MovimentoForm from "../../components/movimentos/movimentoForm/MovimentoForm";
+import { getApiErrorMessage } from "../../utils/getApiErrorMessage";
 
 import "./movimentos.css";
 
@@ -122,9 +123,7 @@ function Movimentos() {
     } catch (error) {
       console.error("Erro ao excluir movimento:", error);
 
-      setError(
-        "Não foi possível excluir o movimento."
-      );
+      setError(getApiErrorMessage(error, "Não foi possível excluir o movimento."));
     }
   }
 

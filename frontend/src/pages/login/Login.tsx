@@ -191,7 +191,12 @@ function Login() {
               <div className="password-header">
                 <label htmlFor="password">Senha</label>
 
-                <a href="/forgot-password">Esqueceu a senha?</a>
+                <span
+                  className="login-password-unavailable"
+                  aria-label="Recuperação de senha indisponível"
+                >
+                  Recuperação indisponível
+                </span>
               </div>
 
               <div className="password-wrapper">

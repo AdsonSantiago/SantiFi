@@ -324,10 +324,16 @@
 }
 
 .password-header a,
+.password-header .login-password-unavailable,
 .register-text a {
   color: var(--login-primary);
   font-size: 0.78rem;
   text-decoration: none;
+}
+
+.password-header .login-password-unavailable {
+  color: var(--login-muted, #8a8a96);
+  cursor: not-allowed;
 }
 
 .password-wrapper {

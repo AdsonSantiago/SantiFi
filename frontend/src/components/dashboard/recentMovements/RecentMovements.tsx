@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./recentMovements-style.css";
 
 import type { Movimento } from "../../../services/movementService";
-import { getMovements } from "../../../services/movementService";
 import { formatCurrency } from "../../../utils/formatCurrency";
 
 function formatDate(date: string): string {
@@ -29,58 +28,8 @@ function getMovementType(tipo: Movimento["tipo"]): string {
     }
 }
 
-function RecentMovements() {
-
-    const [movements, setMovements] = useState<Movimento[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
-
-    useEffect(() => {
-
-        async function carregarMovimentos() {
-
-            try {
-
-                const data = await getMovements();
-
-                setMovements(data.results.slice(0, 5));
-
-            } catch (error) {
-
-                console.error(error);
-
-                setError(
-                    "Não foi possível carregar os lançamentos."
-                );
-
-            } finally {
-
-                setLoading(false);
-
-            }
-        }
-
-        carregarMovimentos();
-
-    }, []);
-
-
-    if (loading) {
-        return (
-            <section className="dashboard-card">
-                <p>Carregando lançamentos...</p>
-            </section>
-        );
-    }
-
-
-    if (error) {
-        return (
-            <section className="dashboard-card">
-                <p>{error}</p>
-            </section>
-        );
-    }
+function RecentMovements({ movements }: { movements: Movimento[] }) {
+    const navigate = useNavigate();
 
 
     return (
@@ -92,7 +41,7 @@ function RecentMovements() {
                     Últimos lançamentos
                 </h2>
 
-                <button type="button">
+                <button type="button" onClick={() => navigate("/movimentos")}>
                     Ver todos
                 </button>
 
@@ -112,7 +61,9 @@ function RecentMovements() {
 
 
                 <tbody>
-
+                    {movements.length === 0 && (
+                        <tr><td colSpan={4}>Nenhum lançamento neste período.</td></tr>
+                    )}
                     {movements.map((movement) => (
 
                         <tr key={movement.id}>

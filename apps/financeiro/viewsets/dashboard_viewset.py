@@ -10,7 +10,8 @@ class DashboardViewSet(ViewSet):
     def list(self, request):
 
         dados = DashboardService.resumo(
-            usuario=request.user
+            usuario=request.user,
+            periodo=request.query_params.get("periodo", "month"),
         )
 
         serializer = DashboardSerializer(dados)

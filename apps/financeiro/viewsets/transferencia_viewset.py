@@ -14,6 +14,10 @@ from apps.financeiro.serializers import TransferenciaSerializer
 @extend_schema(tags=["Transferências"])
 class TransferenciaViewSet(BaseViewSet):
 
+    # Editar somente o registro da transferência deixaria os dois movimentos
+    # espelhados com os valores e as contas antigos.
+    http_method_names = ["get", "post", "delete", "head", "options"]
+
     queryset = Transferencia.objects.select_related(
         "conta_origem",
         "conta_destino",

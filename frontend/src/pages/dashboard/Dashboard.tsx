@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { DashboardData } from "../../services/dashboardService";
+import type { DashboardData, DashboardPeriod } from "../../services/dashboardService";
 import { getDashboard } from "../../services/dashboardService";
 
 import KpiCard from "../../components/dashboard/kpiCard/KpiCard";
@@ -15,6 +15,7 @@ function Dashboard() {
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [periodo, setPeriodo] = useState<DashboardPeriod>("month");
 
   useEffect(() => {
     let ignore = false;
@@ -24,7 +25,7 @@ function Dashboard() {
         setLoading(true);
         setError("");
 
-        const data = await getDashboard();
+        const data = await getDashboard(periodo);
 
         if (!ignore) {
           setDashboard(data);
@@ -47,10 +48,10 @@ function Dashboard() {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [periodo]);
 
   const resultado = dashboard
-    ? Number(dashboard.receitas_mes) - Number(dashboard.despesas_mes)
+    ? Number(dashboard.receitas_periodo) - Number(dashboard.despesas_periodo)
     : 0;
 
   if (loading) {
@@ -95,7 +96,7 @@ function Dashboard() {
 
         <div className="dashboard-period">
           <span aria-hidden="true">◷</span>
-          <select defaultValue="month" aria-label="Período do dashboard">
+          <select value={periodo} onChange={(event) => setPeriodo(event.target.value as DashboardPeriod)} aria-label="Período do dashboard">
             <option value="month">Este mês</option>
             <option value="previous">Mês anterior</option>
             <option value="year">Este ano</option>
@@ -115,12 +116,12 @@ function Dashboard() {
 
         <KpiCard
           title="Receitas"
-          value={formatCurrency(dashboard.receitas_mes)}
+          value={formatCurrency(dashboard.receitas_periodo)}
         />
 
         <KpiCard
           title="Despesas"
-          value={formatCurrency(dashboard.despesas_mes)}
+          value={formatCurrency(dashboard.despesas_periodo)}
         />
 
         <KpiCard
@@ -131,7 +132,7 @@ function Dashboard() {
 
       <section className="dashboard-main">
         <div className="dashboard-card evolution-card">
-          <EvolutionChart />
+          <EvolutionChart data={dashboard.evolucao} periodo={dashboard.periodo} />
         </div>
 
         <div className="dashboard-card alerts-card">
@@ -143,7 +144,7 @@ function Dashboard() {
       </section>
 
       <section className="dashboard-card movements-card">
-        <RecentMovements />
+        <RecentMovements movements={dashboard.movimentos_recentes} />
       </section>
     </div>
   );

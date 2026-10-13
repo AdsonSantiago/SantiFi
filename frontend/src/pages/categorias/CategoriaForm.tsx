@@ -14,6 +14,7 @@ import type {
   Categoria,
   CreateCategoriaData,
 } from "../../services/categoriaService";
+import { getApiErrorMessage } from "../../utils/getApiErrorMessage";
 
 import "./categoriaForm.css";
 
@@ -120,11 +121,12 @@ function CategoriaForm({
         error,
       );
 
-      setErro(
+      setErro(getApiErrorMessage(
+        error,
         editando
           ? "Não foi possível atualizar a categoria."
           : "Não foi possível criar a categoria.",
-      );
+      ));
     } finally {
       setSalvando(false);
     }

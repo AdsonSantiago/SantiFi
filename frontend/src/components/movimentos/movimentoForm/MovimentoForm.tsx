@@ -1,11 +1,11 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
 import type { FormEvent } from "react";
-import axios from "axios";
 
 import type {
     Movimento,
@@ -18,7 +18,13 @@ import {
 } from "../../../services/movementService";
 
 import { getAccounts } from "../../../services/accountService";
-import { getCategories } from "../../../services/categoryService";
+import { getApiErrorMessage } from "../../../utils/getApiErrorMessage";
+import { createMovementDraft } from "../../../services/movementAssistantService";
+import {
+    createCategoria,
+    getCategorias,
+    type Categoria,
+} from "../../../services/categoriaService";
 
 import "./movimentoForm.css";
 
@@ -38,6 +44,34 @@ function getTodayDate(): string {
   return `${year}-${month}-${day}`;
 }
 
+interface SpeechRecognitionResultEvent extends Event {
+  results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }>;
+}
+
+interface LocalSpeechRecognition extends EventTarget {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  processLocally?: boolean;
+  onstart: (() => void) | null;
+  onresult: ((event: SpeechRecognitionResultEvent) => void) | null;
+  onerror: ((event: Event & { error?: string }) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+}
+
+type SpeechRecognitionConstructor = new () => LocalSpeechRecognition;
+
+function getLocalSpeechRecognitionConstructor(): SpeechRecognitionConstructor | null {
+  const speechWindow = window as Window & {
+    SpeechRecognition?: SpeechRecognitionConstructor;
+    webkitSpeechRecognition?: SpeechRecognitionConstructor;
+  };
+
+  return speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition ?? null;
+}
+
 function MovimentoForm({
   movimento,
   onSuccess,
@@ -46,6 +80,10 @@ function MovimentoForm({
   const [conta, setConta] = useState("");
   const [tipo, setTipo] = useState<"REC" | "DES">("DES");
   const [categoria, setCategoria] = useState("");
+  const [novaCategoriaNome, setNovaCategoriaNome] = useState("");
+  const [textoAssistente, setTextoAssistente] = useState("");
+  const [feedbackAssistente, setFeedbackAssistente] = useState("");
+  const [ouvindo, setOuvindo] = useState(false);
   const [descricao, setDescricao] = useState("");
   const [valor, setValor] = useState("");
   const [dataMovimento, setDataMovimento] = useState("");
@@ -56,16 +94,91 @@ function MovimentoForm({
   >([]);
 
   const [categorias, setCategorias] = useState<
-    Awaited<ReturnType<typeof getCategories>>["results"]
+    Awaited<ReturnType<typeof getCategorias>>["results"]
   >([]);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingCategory, setSavingCategory] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState("");
   const [mostrarObservacao, setMostrarObservacao] =
     useState(false);
+  const reconhecimentoRef = useRef<LocalSpeechRecognition | null>(null);
+  const textoAntesDaGravacaoRef = useRef("");
 
   const modoEdicao = Boolean(movimento);
+
+  useEffect(() => () => {
+    reconhecimentoRef.current?.stop();
+    reconhecimentoRef.current = null;
+  }, []);
+
+  function handleGravarVoz() {
+    if (ouvindo) {
+      reconhecimentoRef.current?.stop();
+      return;
+    }
+
+    const SpeechRecognition = getLocalSpeechRecognitionConstructor();
+    if (!SpeechRecognition) {
+      setFeedbackAssistente("Seu navegador não oferece reconhecimento de voz. Você ainda pode digitar a descrição.");
+      return;
+    }
+
+    const reconhecimento = new SpeechRecognition();
+    if (typeof reconhecimento.processLocally !== "boolean") {
+      setFeedbackAssistente("Seu navegador não permite confirmar a transcrição local. Digite a descrição para manter seus dados privados.");
+      return;
+    }
+
+    reconhecimento.lang = "pt-BR";
+    reconhecimento.continuous = true;
+    reconhecimento.interimResults = false;
+    reconhecimento.processLocally = true;
+    textoAntesDaGravacaoRef.current = textoAssistente.trim();
+    reconhecimento.onstart = () => {
+      setOuvindo(true);
+      setFeedbackAssistente("Ouvindo… fale o lançamento e toque em Parar quando terminar.");
+    };
+    reconhecimento.onresult = (event) => {
+      const transcricao = Array.from(event.results)
+        .filter((resultado) => resultado.isFinal)
+        .map((resultado) => resultado[0].transcript.trim())
+        .filter(Boolean)
+        .join(" ");
+
+      if (transcricao) {
+        const textoBase = textoAntesDaGravacaoRef.current;
+        setTextoAssistente(textoBase ? `${textoBase} ${transcricao}` : transcricao);
+      }
+    };
+    reconhecimento.onerror = (event) => {
+      const erroVoz = event.error === "not-allowed"
+        ? "Permita o acesso ao microfone nas configurações do navegador."
+        : event.error === "language-not-supported"
+          ? "O pacote de voz em português não está disponível neste navegador."
+          : "Não foi possível transcrever a fala. Tente novamente ou digite a descrição.";
+      setFeedbackAssistente(erroVoz);
+      setOuvindo(false);
+      reconhecimentoRef.current = null;
+    };
+    reconhecimento.onend = () => {
+      setOuvindo(false);
+      reconhecimentoRef.current = null;
+      setFeedbackAssistente((atual) => atual.startsWith("Ouvindo")
+        ? "Transcrição local concluída. Revise o texto antes de preencher com IA."
+        : atual);
+    };
+
+    reconhecimentoRef.current = reconhecimento;
+    try {
+      reconhecimento.start();
+    } catch {
+      reconhecimentoRef.current = null;
+      setFeedbackAssistente("Não foi possível iniciar o microfone. Confira a permissão do navegador.");
+    }
+  }
 
   useEffect(() => {
       async function carregarDados() {
@@ -76,7 +189,7 @@ function MovimentoForm({
               const [contasResponse, categoriasResponse] =
                   await Promise.all([
                       getAccounts(),
-                      getCategories(),
+                    getCategorias(),
                   ]);
 
               const contasAtivas = contasResponse.results.filter(
@@ -143,6 +256,10 @@ function MovimentoForm({
     );
   }, [categorias, tipo]);
 
+  const categoriaSelecionada = categoriasFiltradas.find(
+    (item) => String(item.id) === categoria,
+  );
+
   useEffect(() => {
     const categoriaAtualExiste = categoriasFiltradas.some(
       (item) => String(item.id) === categoria,
@@ -156,22 +273,77 @@ function MovimentoForm({
   function handleTipoChange(nextTipo: "REC" | "DES") {
     setTipo(nextTipo);
     setCategoria("");
+    setNovaCategoriaNome("");
     setError("");
   }
 
-  function getApiErrorMessage(error: unknown): string {
-    if (!axios.isAxiosError(error)) {
-      return "Ocorreu um erro ao salvar o movimento.";
+  async function handleCriarCategoria() {
+    const nome = novaCategoriaNome.trim();
+    if (nome.length < 2) {
+      setError("Digite um nome com pelo menos 2 caracteres para a categoria.");
+      return;
     }
 
-    const responseData = error.response?.data;
+    try {
+      setSavingCategory(true);
+      setError("");
+      const novaCategoria: Categoria = await createCategoria({
+        nome,
+        tipo,
+        descricao: null,
+        ativo: true,
+      });
+      setCategorias((current) => [...current, novaCategoria]);
+      setCategoria(String(novaCategoria.id));
+      setNovaCategoriaNome("");
+    } catch (createError) {
+      console.error("Erro ao criar categoria pelo formulário de movimento:", createError);
+      setError(getApiErrorMessage(
+        createError,
+        "Não foi possível criar essa categoria. Confira se já existe uma categoria com esse nome.",
+      ));
+    } finally {
+      setSavingCategory(false);
+    }
+  }
 
-    return (
-      responseData?.errors?.non_field_errors?.[0] ||
-      responseData?.detail ||
-      responseData?.message ||
-      "Não foi possível salvar o movimento."
-    );
+  async function handlePreencherComIA() {
+    const texto = textoAssistente.trim();
+    if (texto.length < 3) {
+      setError("Descreva o movimento com pelo menos 3 caracteres.");
+      return;
+    }
+
+    try {
+      setAiLoading(true);
+      setError("");
+      setFeedbackAssistente("");
+      const draft = await createMovementDraft(texto);
+
+      if (draft.tipo) setTipo(draft.tipo);
+      setConta(draft.conta_id ? String(draft.conta_id) : "");
+      setCategoria(draft.categoria_id ? String(draft.categoria_id) : "");
+      setNovaCategoriaNome(
+        draft.categoria_id ? "" : draft.categoria_nome_sugerida,
+      );
+      setValor(draft.valor ?? "");
+      if (draft.data_movimento) {
+        setDataMovimento(draft.data_movimento);
+      }
+      if (draft.descricao) setDescricao(draft.descricao);
+
+      setFeedbackAssistente(
+        draft.pergunta || "Rascunho preenchido. Revise os campos antes de salvar.",
+      );
+    } catch (draftError) {
+      console.error("Erro ao preparar movimento com IA:", draftError);
+      setError(getApiErrorMessage(
+        draftError,
+        "Não foi possível preparar o rascunho. Confira se o Ollama está ativo.",
+      ));
+    } finally {
+      setAiLoading(false);
+    }
   }
 
   async function handleSubmit(
@@ -221,8 +393,6 @@ function MovimentoForm({
     };
 
     try {
-        console.log("Payload enviado:", movimento);
-
         setSaving(true);
         setError("");
 
@@ -238,7 +408,7 @@ function MovimentoForm({
         onSuccess();
     } catch (error) {
         console.error("Erro ao salvar movimento:", error);
-        setError(getApiErrorMessage(error));
+        setError(getApiErrorMessage(error, "Não foi possível salvar o movimento."));
     } finally {
         setSaving(false);
     }
@@ -310,9 +480,62 @@ function MovimentoForm({
           </div>
         )}
 
+        {!modoEdicao && (
+          <section className="movement-ai-draft" aria-labelledby="movement-ai-title">
+            <div className="movement-ai-heading">
+              <div>
+                <p className="movement-ai-eyebrow">PREENCHIMENTO ASSISTIDO</p>
+                <h3 id="movement-ai-title">Descreva o lançamento</h3>
+              </div>
+              <span aria-hidden="true">✦</span>
+            </div>
+            <label htmlFor="movement-ai-text">
+              Escreva como você contaria para alguém
+            </label>
+            <textarea
+              id="movement-ai-text"
+              value={textoAssistente}
+              onChange={(event) => {
+                setTextoAssistente(event.target.value);
+                setFeedbackAssistente("");
+              }}
+              placeholder="Ex.: Paguei R$ 83,50 no mercado hoje usando minha conta corrente."
+              maxLength={500}
+              rows={2}
+                disabled={aiLoading || saving || ouvindo}
+            />
+            <div className="movement-ai-actions">
+              <small>A fala é transcrita localmente no navegador. A IA sugere os campos; você revisa antes de salvar.</small>
+              <div className="movement-ai-buttons">
+                <button
+                  type="button"
+                  className={ouvindo ? "is-listening" : ""}
+                  onClick={handleGravarVoz}
+                  disabled={aiLoading || saving}
+                  aria-pressed={ouvindo}
+                >
+                  {ouvindo ? "Parar gravação" : "Gravar voz"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handlePreencherComIA}
+                  disabled={aiLoading || saving || ouvindo || textoAssistente.trim().length < 3}
+                >
+                  {aiLoading ? "Preparando..." : "Preencher com IA"}
+                </button>
+              </div>
+            </div>
+            {feedbackAssistente && (
+              <p className="movement-ai-feedback" role="status">
+                {feedbackAssistente}
+              </p>
+            )}
+          </section>
+        )}
+
         <fieldset
           className="movimento-form-fields"
-          disabled={saving}
+          disabled={saving || aiLoading || savingCategory}
         >
           <legend className="sr-only">
             Dados do movimento
@@ -426,7 +649,7 @@ function MovimentoForm({
 
             <div className="movimento-form-field">
               <label htmlFor="categoria">
-                Categoria
+                Categoria de {tipo === "REC" ? "receita" : "despesa"}
                 <span aria-hidden="true">*</span>
               </label>
 
@@ -454,6 +677,43 @@ function MovimentoForm({
                   </option>
                 ))}
               </select>
+              {categoriaSelecionada?.descricao && (
+                <small className="movimento-category-description">
+                  {categoriaSelecionada.descricao}
+                </small>
+              )}
+              <div className="movimento-category-create">
+                <label htmlFor="nova-categoria-nome">
+                  Não encontrou? Crie uma categoria de {tipo === "REC" ? "receita" : "despesa"}
+                </label>
+                <div className="movimento-category-create-row">
+                  <input
+                    id="nova-categoria-nome"
+                    type="text"
+                    value={novaCategoriaNome}
+                    onChange={(event) => {
+                      setNovaCategoriaNome(event.target.value);
+                      setError("");
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        void handleCriarCategoria();
+                      }
+                    }}
+                    placeholder={tipo === "REC" ? "Ex.: Freelance" : "Ex.: Mercado"}
+                    maxLength={80}
+                    disabled={savingCategory}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCriarCategoria}
+                    disabled={savingCategory || novaCategoriaNome.trim().length < 2}
+                  >
+                    {savingCategory ? "Criando..." : "Criar"}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 

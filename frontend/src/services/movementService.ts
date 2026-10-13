@@ -1,4 +1,4 @@
-import api from "./api";
+import api, { getAllPages, type PaginatedResponse } from "./api";
 
 export interface Movimento {
     id: number;
@@ -11,12 +11,7 @@ export interface Movimento {
     observacao: string | null;
 }
 
-interface MovementResponse {
-    count: number;
-    next: string | null;
-    previous: string | null;
-    results: Movimento[];
-}
+type MovementResponse = PaginatedResponse<Movimento>;
 
 export interface CreateMovementData {
     conta: number;
@@ -29,11 +24,7 @@ export interface CreateMovementData {
 }
 
 export async function getMovements(): Promise<MovementResponse> {
-    const response = await api.get<MovementResponse>(
-        "/financeiro/movimentos/"
-    );
-
-    return response.data;
+    return getAllPages<Movimento>("/financeiro/movimentos/");
 }
 
 export async function createMovement(

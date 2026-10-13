@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-
 import {
   CartesianGrid,
   Legend,
@@ -11,63 +9,20 @@ import {
   YAxis,
 } from "recharts";
 
-import type { Movimento } from "../../../services/movementService";
-import { getMovements } from "../../../services/movementService";
+import type { DashboardEvolutionPoint, DashboardPeriod } from "../../../services/dashboardService";
 
 import { formatCurrency } from "../../../utils/formatCurrency";
 
 import "./evolutionChart.css";
 
-interface EvolutionData {
-  data: string;
-  receitas: number;
-  despesas: number;
-}
-
 function formatChartDate(date: string): string {
   const [year, month, day] = date.split("-");
 
-  if (!year || !month || !day) {
+  if (!year || !month) {
     return date;
   }
 
-  return `${day}/${month}`;
-}
-
-function compareDates(firstDate: string, secondDate: string) {
-  return firstDate.localeCompare(secondDate);
-}
-
-function agruparMovimentos(
-  movements: Movimento[],
-): EvolutionData[] {
-  const grouped: Record<string, EvolutionData> = {};
-
-  movements.forEach((movement) => {
-    const date = movement.data_movimento;
-
-    if (!grouped[date]) {
-      grouped[date] = {
-        data: date,
-        receitas: 0,
-        despesas: 0,
-      };
-    }
-
-    const value = Number(movement.valor) || 0;
-
-    if (movement.tipo === "REC") {
-      grouped[date].receitas += value;
-    }
-
-    if (movement.tipo === "DES") {
-      grouped[date].despesas += value;
-    }
-  });
-
-  return Object.values(grouped).sort((a, b) =>
-    compareDates(a.data, b.data),
-  );
+  return day ? `${day}/${month}` : `${month}/${year}`;
 }
 
 function CustomTooltip({
@@ -110,44 +65,13 @@ function CustomTooltip({
   );
 }
 
-function EvolutionChart() {
-  const [data, setData] = useState<EvolutionData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    let ignore = false;
-
-    async function carregarMovimentos() {
-      try {
-        setLoading(true);
-        setError("");
-
-        const response = await getMovements();
-        const evolution = agruparMovimentos(response.results);
-
-        if (!ignore) {
-          setData(evolution);
-        }
-      } catch (error) {
-        console.error("Erro ao carregar evolução:", error);
-
-        if (!ignore) {
-          setError("Não foi possível carregar a evolução financeira.");
-        }
-      } finally {
-        if (!ignore) {
-          setLoading(false);
-        }
-      }
-    }
-
-    carregarMovimentos();
-
-    return () => {
-      ignore = true;
-    };
-  }, []);
+function EvolutionChart({ data, periodo }: { data: DashboardEvolutionPoint[]; periodo: DashboardPeriod }) {
+  const chartData = data.map((point) => ({
+    ...point,
+    receitas: Number(point.receitas) || 0,
+    despesas: Number(point.despesas) || 0,
+  }));
+  const hasValues = chartData.some((point) => point.receitas > 0 || point.despesas > 0);
 
   return (
     <section
@@ -161,7 +85,7 @@ function EvolutionChart() {
           <h2 id="evolution-title">Evolução financeira</h2>
 
           <p className="chart-description">
-            Receitas e despesas ao longo do tempo.
+            {periodo === "year" ? "Receitas e despesas por mês." : "Receitas e despesas por dia."}
           </p>
         </div>
 
@@ -171,21 +95,7 @@ function EvolutionChart() {
         </span>
       </div>
 
-      {loading && (
-        <div className="chart-state" role="status">
-          <div className="chart-loader" />
-          <span>Carregando gráfico...</span>
-        </div>
-      )}
-
-      {!loading && error && (
-        <div className="chart-state chart-state-error" role="alert">
-          <span className="chart-state-icon">!</span>
-          <span>{error}</span>
-        </div>
-      )}
-
-      {!loading && !error && data.length === 0 && (
+      {(!chartData.length || !hasValues) && (
         <div className="chart-state" role="status">
           <span className="chart-state-icon">∅</span>
           <strong>Nenhum movimento encontrado</strong>
@@ -195,7 +105,7 @@ function EvolutionChart() {
         </div>
       )}
 
-      {!loading && !error && data.length > 0 && (
+      {chartData.length > 0 && hasValues && (
         <div className="evolution-chart">
           <ResponsiveContainer
             width="100%"
@@ -203,7 +113,7 @@ function EvolutionChart() {
             minWidth={0}
           >
             <LineChart
-              data={data}
+              data={chartData}
               margin={{
                 top: 10,
                 right: 8,

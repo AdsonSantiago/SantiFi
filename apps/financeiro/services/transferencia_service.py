@@ -25,6 +25,16 @@ class TransferenciaService:
                 "A conta de origem deve ser diferente da conta destino."
             )
 
+        if conta_origem.usuario_id != usuario.id:
+            raise TransferenciaException(
+                "A conta de origem não pertence ao usuário."
+            )
+
+        if conta_destino.usuario_id != usuario.id:
+            raise TransferenciaException(
+                "A conta de destino não pertence ao usuário."
+            )
+
         if valor <= 0:
             raise TransferenciaException(
                 "O valor deve ser maior que zero."

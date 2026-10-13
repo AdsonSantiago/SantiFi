@@ -314,15 +314,16 @@ function Configuracoes() {
             <strong>Senha</strong>
 
             <span>
-              Altere sua senha de acesso ao SantiFi.
+              A alteração de senha ainda não está disponível.
             </span>
           </div>
 
           <button
             type="button"
             className="configuracoes-option-button"
+            disabled
           >
-            Alterar senha
+            Em breve
           </button>
         </div>
 
@@ -336,7 +337,7 @@ function Configuracoes() {
           </div>
 
           <span className="configuracoes-status">
-            Não configurado
+            {user.google_configurado ? "Configurado" : "Não configurado"}
           </span>
         </div>
       </section>

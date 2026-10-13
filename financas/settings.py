@@ -24,6 +24,16 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
+# Local AI drafting is disabled by default so production deployments without
+# an Ollama service continue to work normally.
+OLLAMA_ENABLED = os.getenv("OLLAMA_ENABLED", "0") == "1"
+OLLAMA_BASE_URL = os.getenv(
+    "OLLAMA_BASE_URL",
+    "http://127.0.0.1:11434",
+).rstrip("/")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3.5:0.8b")
+OLLAMA_TIMEOUT_SECONDS = int(os.getenv("OLLAMA_TIMEOUT_SECONDS", "180"))
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "0") == "1"
 
@@ -79,6 +89,10 @@ REST_FRAMEWORK = {
 
     "DEFAULT_SCHEMA_CLASS":
         "drf_spectacular.openapi.AutoSchema",
+
+    "DEFAULT_THROTTLE_RATES": {
+        "ai_draft": "10/minute",
+    },
 
 }
 

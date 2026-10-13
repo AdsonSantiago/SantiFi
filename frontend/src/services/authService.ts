@@ -5,6 +5,7 @@ export interface CurrentUser {
     nome: string;
     sobrenome: string;
     email: string;
+    google_configurado: boolean;
 }
 
 export type UpdateCurrentUserData = Pick<

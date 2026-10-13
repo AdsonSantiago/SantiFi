@@ -5,6 +5,7 @@ import {
   deleteCategoria,
 } from "../../services/categoriaService";
 import type { Categoria } from "../../services/categoriaService";
+import { getApiErrorMessage } from "../../utils/getApiErrorMessage";
 import CategoriaForm from "./CategoriaForm";
 
 import "./categorias.css";
@@ -42,7 +43,7 @@ function Categorias() {
       setCategorias(response.results);
     } catch (error) {
       console.error("Erro ao carregar categorias:", error);
-      setErro("Não foi possível carregar as categorias.");
+      setErro(getApiErrorMessage(error, "Não foi possível carregar as categorias."));
     } finally {
       setCarregando(false);
     }
@@ -120,7 +121,7 @@ function Categorias() {
     } catch (error) {
       console.error("Erro ao excluir categoria:", error);
 
-      setErro("Não foi possível excluir a categoria.");
+      setErro(getApiErrorMessage(error, "Não foi possível excluir a categoria."));
     }
   }
 

@@ -29,6 +29,13 @@ class UsuarioGoogleSerializer(serializers.Serializer):
                 }
             )
 
+        if not google_data.get("email_verified"):
+            raise serializers.ValidationError(
+                {
+                    "credential": "O Google não confirmou este endereço de e-mail."
+                }
+            )
+
         attrs["google_data"] = google_data
 
         return attrs

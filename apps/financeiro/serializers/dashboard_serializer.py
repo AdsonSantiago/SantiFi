@@ -1,4 +1,11 @@
 from rest_framework import serializers
+from apps.financeiro.serializers.movimento_serializer import MovimentoSerializer
+
+
+class DashboardEvolutionSerializer(serializers.Serializer):
+    data = serializers.CharField()
+    receitas = serializers.DecimalField(max_digits=12, decimal_places=2)
+    despesas = serializers.DecimalField(max_digits=12, decimal_places=2)
 
 
 class DashboardSerializer(serializers.Serializer):
@@ -32,3 +39,17 @@ class DashboardSerializer(serializers.Serializer):
         max_digits=12,
         decimal_places=2
     )
+
+    periodo = serializers.ChoiceField(choices=("month", "previous", "year"))
+    data_inicio = serializers.DateField()
+    data_fim = serializers.DateField()
+    receitas_periodo = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+    )
+    despesas_periodo = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+    )
+    evolucao = DashboardEvolutionSerializer(many=True)
+    movimentos_recentes = MovimentoSerializer(many=True)

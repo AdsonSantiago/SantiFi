@@ -6,6 +6,7 @@ import type {
 } from "../../../services/accountService";
 
 import "./contaForm.css";
+import { getApiErrorMessage } from "../../../utils/getApiErrorMessage";
 
 interface ContaFormProps {
   conta?: Conta | null;
@@ -98,11 +99,12 @@ function ContaForm({
     } catch (error) {
       console.error(error);
 
-      setError(
+      setError(getApiErrorMessage(
+        error,
         modoEdicao
           ? "Não foi possível atualizar a conta."
           : "Não foi possível criar a conta.",
-      );
+      ));
     } finally {
       setLoading(false);
     }
@@ -213,6 +215,10 @@ function ContaForm({
               required
               aria-required="true"
             >
+              <option value="DIN">
+                Dinheiro
+              </option>
+
               <option value="CC">
                 Conta corrente
               </option>
@@ -222,11 +228,11 @@ function ContaForm({
               </option>
 
               <option value="CAR">
-                Carteira
+                Cartão de crédito
               </option>
 
-              <option value="CRT">
-                Cartão
+              <option value="INV">
+                Investimento
               </option>
             </select>
           </div>

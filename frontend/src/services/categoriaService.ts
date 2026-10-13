@@ -1,4 +1,4 @@
-import api from "./api";
+import api, { getAllPages, type PaginatedResponse } from "./api";
 
 export interface Categoria {
     id: number;
@@ -8,12 +8,7 @@ export interface Categoria {
     ativo: boolean;
 }
 
-interface CategoriaResponse {
-    count: number;
-    next: string | null;
-    previous: string | null;
-    results: Categoria[];
-}
+type CategoriaResponse = PaginatedResponse<Categoria>;
 
 export interface CreateCategoriaData {
     nome: string;
@@ -23,11 +18,7 @@ export interface CreateCategoriaData {
 }
 
 export async function getCategorias(): Promise<CategoriaResponse> {
-    const response = await api.get<CategoriaResponse>(
-        "/financeiro/categorias/"
-    );
-
-    return response.data;
+    return getAllPages<Categoria>("/financeiro/categorias/");
 }
 
 export async function createCategoria(

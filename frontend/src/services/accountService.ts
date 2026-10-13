@@ -1,4 +1,4 @@
-import api from "./api";
+import api, { getAllPages, type PaginatedResponse } from "./api";
 
 export interface Conta {
     id: number;
@@ -26,19 +26,10 @@ export interface UpdateAccountData {
     ativo: boolean;
 }
 
-interface AccountResponse {
-    count: number;
-    next: string | null;
-    previous: string | null;
-    results: Conta[];
-}
+type AccountResponse = PaginatedResponse<Conta>;
 
 export async function getAccounts(): Promise<AccountResponse> {
-    const response = await api.get<AccountResponse>(
-        "/financeiro/contas/"
-    );
-
-    return response.data;
+    return getAllPages<Conta>("/financeiro/contas/");
 }
 
 export async function createAccount(

@@ -22,6 +22,7 @@ class CurrentUserView(APIView):
             "nome": request.user.nome,
             "sobrenome": request.user.sobrenome,
             "email": request.user.email,
+            "google_configurado": bool(request.user.google_id),
         })
 
     def patch(self, request):
@@ -43,6 +44,7 @@ class CurrentUserView(APIView):
                 "nome": usuario.nome,
                 "sobrenome": usuario.sobrenome,
                 "email": usuario.email,
+                "google_configurado": bool(usuario.google_id),
             },
         })
 
@@ -77,4 +79,4 @@ class CadastroUsuarioView(APIView):
             },
             status=status.HTTP_201_CREATED,
         )
-    
+
