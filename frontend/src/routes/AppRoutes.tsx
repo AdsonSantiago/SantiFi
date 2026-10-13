@@ -13,7 +13,7 @@ import Movimentos from "../pages/movimentos/Movimentos";
 import Contas from "../pages/contas/Contas";
 import Categorias from "../pages/categorias/Categorias";
 import Cadastro from "../pages/cadastro/Cadastro";
-import Configuracoes from "../pages/configuracoes/configuracoes";
+import Configuracoes from "../pages/configuracoes/Configuracoes";
 
 function AppRoutes() {
     return (
