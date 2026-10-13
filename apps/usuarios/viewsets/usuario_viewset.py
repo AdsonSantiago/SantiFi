@@ -3,10 +3,13 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+
 from apps.usuarios.serializers.usuario_cadastro_serializer import (
     UsuarioCadastroSerializer,
 )
-
+from apps.usuarios.serializers.usuario_atualizacao_serializer import (
+    UsuarioAtualizacaoSerializer,
+)
 
 class CurrentUserView(APIView):
 
@@ -19,6 +22,28 @@ class CurrentUserView(APIView):
             "nome": request.user.nome,
             "sobrenome": request.user.sobrenome,
             "email": request.user.email,
+        })
+
+    def patch(self, request):
+
+        serializer = UsuarioAtualizacaoSerializer(
+            instance=request.user,
+            data=request.data,
+            partial=True,
+        )
+
+        serializer.is_valid(raise_exception=True)
+        usuario = serializer.save()
+
+        return Response({
+            "success": True,
+            "message": "Dados atualizados com sucesso.",
+            "usuario": {
+                "id": usuario.id,
+                "nome": usuario.nome,
+                "sobrenome": usuario.sobrenome,
+                "email": usuario.email,
+            },
         })
 
 

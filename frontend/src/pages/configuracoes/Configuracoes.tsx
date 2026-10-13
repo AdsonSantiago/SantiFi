@@ -1,7 +1,9 @@
+
 import { useEffect, useState } from "react";
 
 import {
   getCurrentUser,
+  updateCurrentUser,
   type CurrentUser,
 } from "../../services/authService";
 
@@ -9,8 +11,14 @@ import "./configuracoes.css";
 
 function Configuracoes() {
   const [user, setUser] = useState<CurrentUser | null>(null);
+  const [nome, setNome] = useState("");
+  const [sobrenome, setSobrenome] = useState("");
+  const [email, setEmail] = useState("");
+
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -24,12 +32,12 @@ function Configuracoes() {
 
         if (mounted) {
           setUser(data);
+          setNome(data.nome ?? "");
+          setSobrenome(data.sobrenome ?? "");
+          setEmail(data.email ?? "");
         }
       } catch (error) {
-        console.error(
-          "Erro ao carregar usuário:",
-          error,
-        );
+        console.error("Erro ao carregar usuário:", error);
 
         if (mounted) {
           setError(
@@ -50,41 +58,86 @@ function Configuracoes() {
     };
   }, []);
 
+  async function handleSubmit(
+    event: React.FormEvent<HTMLFormElement>,
+  ) {
+    event.preventDefault();
+
+    if (saving) return;
+
+    setError("");
+    setSuccess("");
+
+    const dados = {
+      nome: nome.trim(),
+      sobrenome: sobrenome.trim(),
+      email: email.trim(),
+    };
+
+    if (
+      !dados.nome ||
+      !dados.sobrenome ||
+      !dados.email
+    ) {
+      setError("Preencha todos os campos.");
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const usuarioAtualizado = await updateCurrentUser(dados);
+
+      setUser(usuarioAtualizado);
+      setNome(usuarioAtualizado.nome);
+      setSobrenome(usuarioAtualizado.sobrenome);
+      setEmail(usuarioAtualizado.email);
+      setSuccess("Dados da conta atualizados com sucesso.");
+    } catch (error: unknown) {
+      console.error("Erro ao atualizar usuário:", error);
+
+      const resposta = (
+        error as {
+          response?: {
+            data?: {
+              email?: string[];
+              nome?: string[];
+              sobrenome?: string[];
+              detail?: string;
+              message?: string;
+            };
+          };
+        }
+      ).response?.data;
+
+      const mensagem =
+        resposta?.email?.[0] ??
+        resposta?.nome?.[0] ??
+        resposta?.sobrenome?.[0] ??
+        resposta?.detail ??
+        resposta?.message ??
+        "Não foi possível salvar as alterações. Verifique os dados e tente novamente.";
+
+      setError(mensagem);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   const fullName = user
-    ? `${user.nome ?? ""} ${
-        user.sobrenome ?? ""
-      }`.trim()
+    ? `${user.nome ?? ""} ${user.sobrenome ?? ""}`.trim()
     : "";
 
   const initials = user
-    ? `${user.nome?.[0] ?? ""}${
-        user.sobrenome?.[0] ?? ""
-      }`.toUpperCase()
+    ? `${user.nome?.[0] ?? ""}${user.sobrenome?.[0] ?? ""}`.toUpperCase()
     : "--";
 
   if (loading) {
     return (
       <div className="configuracoes-page">
-        <div
-          className="configuracoes-loading"
-          role="status"
-        >
+        <div className="configuracoes-loading" role="status">
           <span className="configuracoes-loader" />
           <p>Carregando informações da conta...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="configuracoes-page">
-        <div
-          className="configuracoes-error"
-          role="alert"
-        >
-          <span aria-hidden="true">!</span>
-          {error}
         </div>
       </div>
     );
@@ -93,22 +146,8 @@ function Configuracoes() {
   if (!user) {
     return (
       <div className="configuracoes-page">
-        <div
-          className="configuracoes-empty"
-          role="status"
-        >
-          <span
-            className="configuracoes-state-icon"
-            aria-hidden="true"
-          >
-            ∅
-          </span>
-
-          <h2>Usuário não encontrado</h2>
-
-          <p>
-            Não foi possível encontrar os dados da sua conta.
-          </p>
+        <div className="configuracoes-error" role="alert">
+          {error || "Não foi possível carregar os dados da conta."}
         </div>
       </div>
     );
@@ -138,15 +177,12 @@ function Configuracoes() {
           <h2 id="conta-title">Minha conta</h2>
 
           <p>
-            Gerencie suas informações pessoais.
+            Atualize suas informações pessoais.
           </p>
         </div>
 
         <div className="configuracoes-card configuracoes-profile-card">
-          <div
-            className="configuracoes-avatar"
-            aria-hidden="true"
-          >
+          <div className="configuracoes-avatar" aria-hidden="true">
             {initials}
           </div>
 
@@ -155,6 +191,110 @@ function Configuracoes() {
             <span>{user.email}</span>
           </div>
         </div>
+
+        <form
+          className="configuracoes-card configuracoes-form"
+          onSubmit={handleSubmit}
+          noValidate
+        >
+          <div className="configuracoes-field">
+            <label htmlFor="config-nome">Nome</label>
+
+            <input
+              id="config-nome"
+              type="text"
+              value={nome}
+              onChange={(event) => setNome(event.target.value);
+                  setError("");
+                  setSuccess("");
+              }
+              autoComplete="given-name"
+              maxLength={150}
+              required
+            />
+          </div>
+
+          <div className="configuracoes-field">
+            <label htmlFor="config-sobrenome">Sobrenome</label>
+
+            <input
+              id="config-sobrenome"
+              type="text"
+              value={sobrenome}
+              onChange={(event) => setSobrenome(event.target.value);
+                setError("");
+                setSuccess("");
+              }
+              autoComplete="family-name"
+              maxLength={150}
+              required
+            />
+          </div>
+
+          <div className="configuracoes-field">
+            <label htmlFor="config-email">E-mail</label>
+
+            <input
+              id="config-email"
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value);
+                setError("");
+                setSuccess("");
+              }
+              autoComplete="email"
+              maxLength={254}
+              required
+            />
+          </div>
+
+          {error && (
+            <p className="configuracoes-error" role="alert">
+              {error}
+            </p>
+          )}
+
+          {success && (
+            <p className="configuracoes-success" role="status">
+              {success}
+            </p>
+          )}
+
+          <div className="configuracoes-form-actions">
+            <button
+              type="button"
+              className="configuracoes-cancel-button"
+              disabled={saving}
+              onClick={() => {
+                setNome(user.nome);
+                setSobrenome(user.sobrenome);
+                setEmail(user.email);
+                setError("");
+                setSuccess("");
+              }}
+            >
+              Restaurar dados
+            </button>
+
+            <button
+              type="submit"
+              className="configuracoes-option-button"
+              disabled={saving}
+            >
+              {saving ? (
+                <>
+                  <span
+                    className="configuracoes-submit-spinner"
+                    aria-hidden="true"
+                  />
+                  Salvando...
+                </>
+              ) : (
+                "Salvar alterações"
+              )}
+            </button>
+          </div>
+        </form>
       </section>
 
       <section

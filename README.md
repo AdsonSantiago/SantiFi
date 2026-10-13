@@ -55,6 +55,10 @@ Usuário marca como Pago
         ├─► Se recorrente → cria próximo planejamento
         └─► Se parcelado → cria próxima parcela
 
+backend: santi-fi.vercel.app
+front:   santifi.vercel.app
+Postgree: neon.console.tech
+
 ### 🤖 Próxima Evolução: AI Agent
 
 A ideia é que o usuário não precise mais preencher forms:

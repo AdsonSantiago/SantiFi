@@ -7,8 +7,12 @@ export interface CurrentUser {
     email: string;
 }
 
-export async function getCurrentUser(): Promise<CurrentUser> {
+export type UpdateCurrentUserData = Pick<
+    CurrentUser,
+    "nome" | "sobrenome" | "email"
+>;
 
+export async function getCurrentUser(): Promise<CurrentUser> {
     const response = await api.get<CurrentUser>(
         "/usuarios/me/"
     );
@@ -16,10 +20,22 @@ export async function getCurrentUser(): Promise<CurrentUser> {
     return response.data;
 }
 
+export async function updateCurrentUser(
+    data: UpdateCurrentUserData
+): Promise<CurrentUser> {
+    const response = await api.patch<{
+        success: boolean;
+        message: string;
+        usuario: CurrentUser;
+    }>(
+        "/usuarios/me/",
+        data
+    );
+
+    return response.data.usuario;
+}
 
 export function logout(): void {
-
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
-
 }
