@@ -20,6 +20,7 @@ import {
 import { getAccounts } from "../../../services/accountService";
 import { getApiErrorMessage } from "../../../utils/getApiErrorMessage";
 import { createMovementDraft } from "../../../services/movementAssistantService";
+import { transcribeMovementAudio } from "../../../services/movementSpeechService";
 import {
     createCategoria,
     getCategorias,
@@ -44,34 +45,6 @@ function getTodayDate(): string {
   return `${year}-${month}-${day}`;
 }
 
-interface SpeechRecognitionResultEvent extends Event {
-  results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }>;
-}
-
-interface LocalSpeechRecognition extends EventTarget {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  processLocally?: boolean;
-  onstart: (() => void) | null;
-  onresult: ((event: SpeechRecognitionResultEvent) => void) | null;
-  onerror: ((event: Event & { error?: string }) => void) | null;
-  onend: (() => void) | null;
-  start(): void;
-  stop(): void;
-}
-
-type SpeechRecognitionConstructor = new () => LocalSpeechRecognition;
-
-function getLocalSpeechRecognitionConstructor(): SpeechRecognitionConstructor | null {
-  const speechWindow = window as Window & {
-    SpeechRecognition?: SpeechRecognitionConstructor;
-    webkitSpeechRecognition?: SpeechRecognitionConstructor;
-  };
-
-  return speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition ?? null;
-}
-
 function MovimentoForm({
   movimento,
   onSuccess,
@@ -84,6 +57,7 @@ function MovimentoForm({
   const [textoAssistente, setTextoAssistente] = useState("");
   const [feedbackAssistente, setFeedbackAssistente] = useState("");
   const [ouvindo, setOuvindo] = useState(false);
+  const [transcrevendo, setTranscrevendo] = useState(false);
   const [descricao, setDescricao] = useState("");
   const [valor, setValor] = useState("");
   const [dataMovimento, setDataMovimento] = useState("");
@@ -104,79 +78,118 @@ function MovimentoForm({
   const [error, setError] = useState("");
   const [mostrarObservacao, setMostrarObservacao] =
     useState(false);
-  const reconhecimentoRef = useRef<LocalSpeechRecognition | null>(null);
-  const textoAntesDaGravacaoRef = useRef("");
+  const gravadorRef = useRef<MediaRecorder | null>(null);
+  const streamMicrofoneRef = useRef<MediaStream | null>(null);
+  const partesAudioRef = useRef<Blob[]>([]);
+  const limiteGravacaoRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const modoEdicao = Boolean(movimento);
 
   useEffect(() => () => {
-    reconhecimentoRef.current?.stop();
-    reconhecimentoRef.current = null;
+    if (limiteGravacaoRef.current) clearTimeout(limiteGravacaoRef.current);
+    if (gravadorRef.current) {
+      gravadorRef.current.onstop = null;
+      if (gravadorRef.current.state !== "inactive") gravadorRef.current.stop();
+    }
+    streamMicrofoneRef.current?.getTracks().forEach((track) => track.stop());
   }, []);
 
-  function handleGravarVoz() {
+  async function handleGravarVoz() {
     if (ouvindo) {
-      reconhecimentoRef.current?.stop();
+      gravadorRef.current?.stop();
       return;
     }
 
-    const SpeechRecognition = getLocalSpeechRecognitionConstructor();
-    if (!SpeechRecognition) {
-      setFeedbackAssistente("Seu navegador não oferece reconhecimento de voz. Você ainda pode digitar a descrição.");
+    if (transcrevendo) return;
+
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      setFeedbackAssistente("Este navegador não oferece gravação de áudio. Você ainda pode digitar a descrição.");
       return;
     }
 
-    const reconhecimento = new SpeechRecognition();
-    if (typeof reconhecimento.processLocally !== "boolean") {
-      setFeedbackAssistente("Seu navegador não permite confirmar a transcrição local. Digite a descrição para manter seus dados privados.");
-      return;
-    }
-
-    reconhecimento.lang = "pt-BR";
-    reconhecimento.continuous = true;
-    reconhecimento.interimResults = false;
-    reconhecimento.processLocally = true;
-    textoAntesDaGravacaoRef.current = textoAssistente.trim();
-    reconhecimento.onstart = () => {
-      setOuvindo(true);
-      setFeedbackAssistente("Ouvindo… fale o lançamento e toque em Parar quando terminar.");
-    };
-    reconhecimento.onresult = (event) => {
-      const transcricao = Array.from(event.results)
-        .filter((resultado) => resultado.isFinal)
-        .map((resultado) => resultado[0].transcript.trim())
-        .filter(Boolean)
-        .join(" ");
-
-      if (transcricao) {
-        const textoBase = textoAntesDaGravacaoRef.current;
-        setTextoAssistente(textoBase ? `${textoBase} ${transcricao}` : transcricao);
-      }
-    };
-    reconhecimento.onerror = (event) => {
-      const erroVoz = event.error === "not-allowed"
-        ? "Permita o acesso ao microfone nas configurações do navegador."
-        : event.error === "language-not-supported"
-          ? "O pacote de voz em português não está disponível neste navegador."
-          : "Não foi possível transcrever a fala. Tente novamente ou digite a descrição.";
-      setFeedbackAssistente(erroVoz);
-      setOuvindo(false);
-      reconhecimentoRef.current = null;
-    };
-    reconhecimento.onend = () => {
-      setOuvindo(false);
-      reconhecimentoRef.current = null;
-      setFeedbackAssistente((atual) => atual.startsWith("Ouvindo")
-        ? "Transcrição local concluída. Revise o texto antes de preencher com IA."
-        : atual);
-    };
-
-    reconhecimentoRef.current = reconhecimento;
+    let stream: MediaStream;
     try {
-      reconhecimento.start();
+      setFeedbackAssistente("Solicitando acesso ao microfone…");
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (microphoneError) {
+      console.error("Não foi possível acessar o microfone:", microphoneError);
+      setFeedbackAssistente("Não foi possível acessar o microfone. Confira a permissão do navegador e tente novamente.");
+      return;
+    }
+
+    streamMicrofoneRef.current = stream;
+    const formatos = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"];
+    const formato = formatos.find((item) => MediaRecorder.isTypeSupported(item));
+    const gravador = formato
+      ? new MediaRecorder(stream, { mimeType: formato })
+      : new MediaRecorder(stream);
+    partesAudioRef.current = [];
+    gravadorRef.current = gravador;
+    gravador.ondataavailable = (event) => {
+      if (event.data.size > 0) partesAudioRef.current.push(event.data);
+    };
+    gravador.onerror = () => {
+      stream.getTracks().forEach((track) => track.stop());
+      streamMicrofoneRef.current = null;
+      gravadorRef.current = null;
+      setOuvindo(false);
+      setFeedbackAssistente("Ocorreu um erro durante a gravação. Tente novamente ou digite a descrição.");
+    };
+    gravador.onstop = () => {
+      if (limiteGravacaoRef.current) clearTimeout(limiteGravacaoRef.current);
+      stream.getTracks().forEach((track) => track.stop());
+      streamMicrofoneRef.current = null;
+      gravadorRef.current = null;
+      setOuvindo(false);
+
+      const audio = new Blob(partesAudioRef.current, { type: gravador.mimeType });
+      partesAudioRef.current = [];
+      if (audio.size === 0) {
+        setFeedbackAssistente("Nenhum áudio foi capturado. Tente gravar novamente.");
+        return;
+      }
+
+      setTranscrevendo(true);
+      setFeedbackAssistente("Transcrevendo no dispositivo. Na primeira vez, o modelo Whisper será baixado…");
+      void transcribeMovementAudio(audio, (percent) => {
+        setFeedbackAssistente(percent === null
+          ? "Carregando o modelo Whisper no dispositivo…"
+          : `Baixando o modelo Whisper: ${Math.round(percent)}%`);
+      })
+        .then((transcricao) => {
+          if (!transcricao) {
+            setFeedbackAssistente("Não consegui reconhecer a fala. Tente novamente ou digite a descrição.");
+            return;
+          }
+          setTextoAssistente((atual) => {
+            const textoAtual = atual.trim();
+            return textoAtual ? `${textoAtual} ${transcricao}` : transcricao;
+          });
+          setFeedbackAssistente("Transcrição concluída no dispositivo. Revise o texto antes de preencher com IA.");
+        })
+        .catch((transcriptionError: unknown) => {
+          console.error("Erro ao transcrever áudio localmente:", transcriptionError);
+          setFeedbackAssistente("Não foi possível carregar ou executar o Whisper. Confira sua conexão na primeira utilização e tente novamente.");
+        })
+        .finally(() => setTranscrevendo(false));
+    };
+
+    try {
+      gravador.start();
+      setOuvindo(true);
+      setFeedbackAssistente("Gravando… fale o lançamento e toque em Parar quando terminar.");
+      limiteGravacaoRef.current = setTimeout(() => {
+        if (gravador.state === "recording") {
+          setFeedbackAssistente("Limite de 60 segundos atingido. Processando a gravação…");
+          gravador.stop();
+        }
+      }, 60_000);
     } catch {
-      reconhecimentoRef.current = null;
-      setFeedbackAssistente("Não foi possível iniciar o microfone. Confira a permissão do navegador.");
+      stream.getTracks().forEach((track) => track.stop());
+      streamMicrofoneRef.current = null;
+      gravadorRef.current = null;
+      setOuvindo(false);
+      setFeedbackAssistente("Não foi possível iniciar a gravação. Confira a permissão do microfone.");
     }
   }
 
@@ -502,24 +515,24 @@ function MovimentoForm({
               placeholder="Ex.: Paguei R$ 83,50 no mercado hoje usando minha conta corrente."
               maxLength={500}
               rows={2}
-                disabled={aiLoading || saving || ouvindo}
+                disabled={aiLoading || saving || ouvindo || transcrevendo}
             />
             <div className="movement-ai-actions">
-              <small>A fala é transcrita localmente no navegador. A IA sugere os campos; você revisa antes de salvar.</small>
+              <small>O áudio é transcrito no dispositivo e não é enviado ao app. Na primeira vez, o modelo é baixado; depois fica em cache.</small>
               <div className="movement-ai-buttons">
                 <button
                   type="button"
                   className={ouvindo ? "is-listening" : ""}
                   onClick={handleGravarVoz}
-                  disabled={aiLoading || saving}
+                  disabled={aiLoading || saving || transcrevendo}
                   aria-pressed={ouvindo}
                 >
-                  {ouvindo ? "Parar gravação" : "Gravar voz"}
+                  {transcrevendo ? "Transcrevendo…" : ouvindo ? "Parar gravação" : "Gravar voz"}
                 </button>
                 <button
                   type="button"
                   onClick={handlePreencherComIA}
-                  disabled={aiLoading || saving || ouvindo || textoAssistente.trim().length < 3}
+                  disabled={aiLoading || saving || ouvindo || transcrevendo || textoAssistente.trim().length < 3}
                 >
                   {aiLoading ? "Preparando..." : "Preencher com IA"}
                 </button>
